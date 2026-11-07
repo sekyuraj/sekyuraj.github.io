@@ -1,0 +1,21 @@
+{
+	storage file_system /var/lib/caddy
+	persist_config off
+}
+
+sekraj.duckdns.org {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	handle {
+		root * /srv/sekraj
+		file_server
+	}
+
+	log {
+		output file /var/log/caddy/access.log
+	}
+}

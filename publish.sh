@@ -1,22 +1,29 @@
 #!/bin/sh
-# Puts ~/src/site online at https://sekyuraj.github.io (free, HTTPS, no port forwarding).
-# Run it again any time after editing files to update the live site.
+# Puts ~/src/site live on https://sekraj.duckdns.org (served from this PC).
+# Run it again any time after editing files.
+#
+# Only committed files go online, minus the scripts and tools, so things
+# like shots-raw/ (gitignored) never get served.
+# The GitHub repo still gets a push as a backup copy (sekyuraj.github.io).
 set -e
 cd "$(dirname "$0")"
-REPO=sekyuraj/sekyuraj.github.io
 
-if [ ! -d .git ]; then
-    git init -q -b main
-fi
 git add -A
 git commit -qm "update site" 2>/dev/null || echo "nothing new to commit"
 
-if ! gh repo view "$REPO" >/dev/null 2>&1; then
-    gh repo create "$REPO" --public --source . --push
-else
-    git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$REPO.git"
-    git push -u origin main
+git ls-files \
+  | grep -vE '^(CNAME|\.gitignore|\.nojekyll|[^/]*\.sh|tools/|selfhost/|server/)' \
+  | rsync -a --files-from=- ./ /srv/sekraj/
+# --files-from doesn't delete; clear out files that are gone from git
+( cd /srv/sekraj && find . -type f | sed 's|^\./||' ) | while read -r f; do
+    git ls-files --error-unmatch -- "$f" >/dev/null 2>&1 || rm -f "/srv/sekraj/$f"
+done
+find /srv/sekraj -mindepth 1 -type d -empty -delete
+echo "live: https://sekraj.duckdns.org"
+
+# ./publish.sh api  -> also restart the Node backend (after editing server/)
+if [ "$1" = api ]; then
+    sudo rc-service sekraj-api restart
 fi
 
-echo
-echo "live in ~1 minute at: https://sekyuraj.github.io"
+git push -q origin main 2>/dev/null && echo "backup pushed to GitHub" || true

@@ -1,0 +1,23 @@
+#!/sbin/openrc-run
+# Node backend for sekraj.duckdns.org (/api/*), runs as tux.
+
+description="sekraj.duckdns.org API (node)"
+command="/usr/bin/node"
+command_args="/home/tux/src/site/server/server.js"
+command_user="tux:tux"
+directory="/home/tux/src/site/server"
+supervisor="supervise-daemon"
+respawn_delay=2
+respawn_max=0
+output_log="/var/log/sekraj-api.log"
+error_log="/var/log/sekraj-api.log"
+supervise_daemon_args="--env HOME=/home/tux --env NODE_ENV=production"
+
+depend() {
+	need net
+	before caddy
+}
+
+start_pre() {
+	checkpath --file --owner tux:tux --mode 0644 /var/log/sekraj-api.log
+}

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Leaving ip= empty makes DuckDNS use the address the request came from,
+# which is the router's public IPv4.
+TOKEN=$(cat /home/tux/.config/duckdns/token)
+last=
+while :; do
+    r=$(curl -4 -s -m 20 "https://www.duckdns.org/update?domains=sekraj&token=$TOKEN&ip=&verbose=true")
+    status=$(printf '%s\n' "$r" | head -n1)
+    ip=$(printf '%s\n' "$r" | sed -n 2p)
+    if [ "$status" = OK ]; then
+        [ "$ip" != "$last" ] && echo "$(date '+%F %T') sekraj -> $ip"
+        last=$ip
+    else
+        echo "$(date '+%F %T') update failed: $status"
+    fi
+    sleep 300
+done

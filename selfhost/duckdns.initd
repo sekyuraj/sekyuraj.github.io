@@ -1,0 +1,19 @@
+#!/sbin/openrc-run
+# Keeps sekraj.duckdns.org pointed at this house's public IP.
+# Telekom changes it now and then, so it's checked every 5 minutes.
+
+description="DuckDNS updater for sekraj"
+command="/usr/local/sbin/duckdns-update"
+command_user="tux:tux"
+supervisor="supervise-daemon"
+respawn_delay=30
+output_log="/var/log/duckdns.log"
+error_log="/var/log/duckdns.log"
+
+depend() {
+	need net
+}
+
+start_pre() {
+	checkpath --file --owner tux:tux --mode 0644 /var/log/duckdns.log
+}
