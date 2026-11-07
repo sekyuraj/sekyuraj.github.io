@@ -31,6 +31,9 @@ gh repo view "$REPO" >/dev/null 2>&1 || ./publish.sh
 
 echo "$DOMAIN" > CNAME
 ./publish.sh
+sleep 5
+gh api "repos/$REPO/pages" >/dev/null 2>&1 || \
+    gh api -X POST "repos/$REPO/pages" -f 'source[branch]=main' -f 'source[path]=/' >/dev/null
 gh api -X PUT "repos/$REPO/pages" -f cname="$DOMAIN" >/dev/null
 echo "custom domain set on GitHub"
 
