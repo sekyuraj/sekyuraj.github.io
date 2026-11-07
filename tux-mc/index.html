@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="soft" data-ground="sage" data-buttons="tonal" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>tux-mc: a Minecraft 26.3 client and launcher for Linux and Windows</title>
+<meta name="description" content="A Fabric mod with a Right Shift menu, emotes and capes other players see, plus a fast launcher written in C. Free and open source.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="tux-mc: a Minecraft 26.3 client and launcher">
+<meta property="og:description" content="A Fabric mod with a Right Shift menu, emotes and capes other players see, plus a launcher written in C.">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0f1f10">
+<link rel="canonical" href="https://sekraj.duckdns.org/tux-mc/">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<style>
+:root {
+  --p-bg: #0f1f10; --p-surface: #162a17; --p-ink: #ffffff; --p-muted: #9aa39a;
+  --p-accent: #c6f19d; --p-accent-ink: #0f1f10; --p-action: #c6f19d; --p-action-ink: #0f1f10;
+  --p-inv-bg: #ffffff; --p-inv-surface: #ecedec; --p-inv-ink: #0f1f10; --p-inv-muted: #606c60;
+  --p-inv-accent: #0f1f10; --p-inv-accent-ink: #ffffff; --p-inv-action: #0f1f10; --p-inv-action-ink: #ffffff;
+  --font-display: "Host Grotesk", system-ui, sans-serif;
+  --font-text: "Host Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.04em;
+}
+</style>
+<link rel="stylesheet" href="assets/ui/base.css">
+<link rel="stylesheet" href="assets/ui/terminal-run/fragment.css">
+<link rel="stylesheet" href="assets/diagrams/diagram.css">
+<link rel="stylesheet" href="assets/moments/iris-opens/moment.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="assets/backgrounds/backgrounds.js"></script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<link rel="modulepreload" href="assets/moments/moments.js">
+<link rel="modulepreload" href="assets/moments/lib.js">
+<link rel="modulepreload" href="assets/moments/iris-opens/moment.js">
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<!-- type: software (a game client: a Fabric mod and its launcher)
+     deal: hero collage, palette forest-pale-lime (grass green ground and a lime accent: the colours of the
+     game's own overworld, next to the launcher's black), type host, nav nav-cards, close close-type,
+     footer footer-statement, rhythm surface-pairs, buttons tonal, mark dots, grounds topglow
+     moments: iris-opens on #capes (the one section on the inverse ground) -->
+
+<header class="nav">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#top">Skip to content</a>
+    <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>tux-mc</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item">
+        <a class="nav__link" href="#mod">Mod <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <a class="menu-card span-3" href="#mod">
+              <div class="panel"><img width="1600" height="640" class="frame__img" src="img/fill-800.jpg" srcset="img/fill-800.jpg 800w, img/fill.jpg 1600w" sizes="320px" alt="A giant block of red sand filled in one command" loading="lazy"></div>
+              <span class="t-card">The mod</span>
+              <span class="t-small muted">Menu, emotes, zoom, hit fix</span>
+            </a>
+            <a class="menu-card span-3" href="#capes">
+              <div class="panel"><img class="frame__img" width="160" height="256" src="img/capes/gentoo.png" alt="The Gentoo cape" loading="lazy" style="object-fit: contain; image-rendering: auto"></div>
+              <span class="t-card">Capes</span>
+              <span class="t-small muted">Thirteen built in, or your picture</span>
+            </a>
+            <a class="menu-card span-3" href="#launcher">
+              <div class="panel"><img width="1600" height="850" class="frame__img" src="img/launcher-mods-800.jpg" srcset="img/launcher-mods-800.jpg 800w, img/launcher-mods.jpg 1600w" sizes="320px" alt="The launcher's Mods page" loading="lazy"></div>
+              <span class="t-card">The launcher</span>
+              <span class="t-small muted">GTK4 and C, Prism underneath</span>
+            </a>
+            <a class="menu-card span-3" href="#install">
+              <div class="panel"><img width="1600" height="850" class="frame__img" src="img/launcher-instances-800.jpg" srcset="img/launcher-instances-800.jpg 800w, img/launcher-instances.jpg 1600w" sizes="320px" alt="The launcher's Instances page" loading="lazy"></div>
+              <span class="t-card">Install</span>
+              <span class="t-small muted">One script on Linux, a zip on Windows</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="#capes">Capes</a></div>
+      <div class="nav__item"><a class="nav__link" href="#launcher">Launcher</a></div>
+      <div class="nav__item"><a class="nav__link" href="#sharing">Sharing</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/sekyuraj/tux-mc">GitHub</a>
+      <a class="btn btn--primary" href="#install">Download</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--collage" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <h1 id="hero-h">A Minecraft client for Linux and Windows</h1>
+        <p class="hero__lead">tuxmc is a Fabric mod for 26.3 with a Right Shift menu, emotes and capes other players see, and a hit delay fix. The launcher is written in C, with Prism Launcher underneath.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="#install">Download tux-mc<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+          <a class="btn btn--secondary" href="https://github.com/sekyuraj/tux-mc">Read the source</a>
+        </div>
+        <p class="hero__proof">Free, MIT licensed. Updates itself with checked downloads.</p>
+      </div>
+      <div class="hero__art span-6 start-7" role="img" aria-label="The tux-mc launcher's home page with a player model and the cape picker, and an update being installed">
+        <div class="ly-piece ly-piece--main shot" aria-hidden="true">
+          <img src="img/launcher-home.jpg" srcset="img/launcher-home-800.jpg 800w, img/launcher-home.jpg 1600w" sizes="(min-width: 1024px) 45vw, 100vw" alt="" width="1600" height="850" fetchpriority="high" data-source="client" data-subject="the tux-mc launcher">
+        </div>
+        <div class="ly-piece ly-piece--note upd" aria-hidden="true" data-ly-steps="700">
+          <div class="upd__row"><h5>Update 1.4.7</h5><span class="upd__chip" data-step data-step-at="4">Ready</span></div>
+          <div class="upd__line" data-step><i>&darr;</i><span>Launcher and <b>tuxmc.jar</b> downloaded</span></div>
+          <div class="upd__line" data-step><i>&check;</i><span>Both match their <b>.sha256</b></span></div>
+          <div class="upd__line" data-step><i>&check;</i><span>Mod swapped in the <b>26.3</b> instance</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section g2" id="mod" aria-labelledby="mod-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="mod-h">The mod. <span class="muted">Small things that save you a trip to five other mods.</span></h2>
+        </div>
+        <div class="grid">
+          <article class="card card--row card--open span-6">
+            <h3>The Right Shift menu</h3>
+            <p>Network, Server, Waypoints, Emotes, Capes and Settings in one place. The Server tab shows your queue position, its ETA and the TPS.</p>
+            <div class="panel lit">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:440px;--ax:max(24px, 50% - 220px);--ay:40px;--ay-sm:16px">
+                <div class="tm" role="img" aria-label="The tuxmc menu on its Network tab, listing the game's open connections">
+                  <div class="tm__tabs"><span class="is-on">Network</span><span>Server</span><span>Waypoints</span><span>Emotes</span></div>
+                  <div class="tm__row"><span class="tm__dot"></span><b>mc.hypixel.net</b><span>25565</span><em>1.2 MB</em></div>
+                  <div class="tm__row"><span class="tm__dot"></span><b>api.minecraftservices.com</b><span>443</span><em>38 KB</em></div>
+                  <div class="tm__row"><span class="tm__dot"></span><b>relay.damus.io</b><span>443</span><em>12 KB</em></div>
+                  <div class="tm__row"><span class="tm__dot"></span><b>nos.lol</b><span>443</span><em>9 KB</em></div>
+                  <div class="tm__row"><span class="tm__dot"></span><b>resources.download.minecraft.net</b><span>443</span><em>640 KB</em></div>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row card--open span-6">
+            <h3>8 emotes on one key</h3>
+            <p>Press the period key for wave, dance, sit, lay, clap, spin, bow or dab. Most keep going until you move, and other tux-mc players see them.</p>
+            <div class="panel lit">
+              <div class="stage"><div class="wheel" data-wheel role="img" aria-label="The emote wheel with eight emotes around it">
+                <span style="--i:0">Wave</span><span style="--i:1">Dance</span><span style="--i:2">Sit</span><span style="--i:3">Lay</span>
+                <span style="--i:4">Clap</span><span style="--i:5">Spin</span><span style="--i:6">Bow</span><span style="--i:7">Dab</span>
+                <b class="wheel__mid">.</b>
+              </div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card card--row card--open span-6">
+          <h3>No 0.5 s hit delay after a miss</h3>
+          <p>On modern versions a click on air blocks your next clicks for half a second. tuxmc removes that block. Turn it off under Settings, Combat.</p>
+          <div class="panel lit">
+            <div class="stage"><div class="hits" role="img" aria-label="Ten clicks in a row: without the fix four are dropped after a miss, with tuxmc all ten are sent">
+              <div class="hits__row"><span class="hits__name">Vanilla</span><span class="hits__clicks"><i class="miss"></i><i class="drop"></i><i class="drop"></i><i class="drop"></i><i class="drop"></i><i></i><i></i><i></i><i></i><i></i></span></div>
+              <div class="hits__row"><span class="hits__name">tuxmc</span><span class="hits__clicks"><i class="miss"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+              <div class="hits__key"><span><i class="miss"></i>miss</span><span><i class="drop"></i>dropped</span><span><i></i>sent</span></div>
+            </div></div>
+          </div>
+        </article>
+        <article class="card card--row card--open span-6">
+          <h3>/fill past 32,768 blocks</h3>
+          <p>/fill, /clone and /fillbiome take any size in singleplayer and LAN. This block is 1,572,000 of them, in one command.</p>
+          <div class="panel"><img class="frame__img" src="img/fill-800.jpg" srcset="img/fill-800.jpg 800w, img/fill.jpg 1600w" sizes="(min-width: 1024px) 50vw, 100vw" alt="A huge block of red sand over a forest, made with one /fill command" loading="lazy" width="1600" height="640" data-source="client" data-subject="the fill command in game"></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ground-inverse" id="capes" data-moment="iris-opens" data-moment-opts='{"from": "base"}' aria-labelledby="capes-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="capes-h">Thirteen capes in the mod. <span class="muted">Or one from your own picture.</span></h2>
+      </div>
+      <div class="grid capes fill">
+        <div class="span-5 capes__pick">
+          <div class="capes__text">
+            <p>Pick one in the launcher or in game. The mod paints it at 2048 pixels wide, so the logos stay sharp up close. Drag the cape to turn it.</p>
+            <p class="capes__more">For your own, pick New picture in the launcher: drag the picture into place, zoom, rotate or flip it, and save it under a name. Other players see it too.</p>
+          </div>
+          <div class="chips" role="radiogroup" aria-label="Capes">
+            <button type="button" role="radio" aria-checked="true" data-cape="tux" data-edge="#111111">Tux</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="gentoo" data-edge="#403b5b">Gentoo</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="arch" data-edge="#14161b">Arch</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="debian" data-edge="#9f9f9f">Debian</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="mint" data-edge="#1e1e1e">Mint</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="steamos" data-edge="#121a24">SteamOS</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="freebsd" data-edge="#191919">FreeBSD</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="openbsd" data-edge="#1c304e">OpenBSD</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="lfs" data-edge="#a6a6a6">LFS</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="crux" data-edge="#142137">CRUX</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="windows11" data-edge="#9e9e9e">Windows 11</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="stars" data-edge="#03050c">Starfield</button>
+            <button type="button" role="radio" aria-checked="false" data-cape="synth" data-edge="#120422">Synthwave</button>
+          </div>
+        </div>
+        <div class="span-6 start-7 capes__stage" data-cape-stage>
+          <div class="cape" data-cape-body style="--edge:#111111" role="img" aria-label="The Tux cape">
+            <div class="cape__face cape__front"><img src="img/capes/tux.png" alt="" width="160" height="256" data-cape-img></div>
+            <div class="cape__face cape__back"></div>
+            <div class="cape__side cape__left"></div>
+            <div class="cape__side cape__right"></div>
+            <div class="cape__top"></div>
+          </div>
+          <div class="cape__floor" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="launcher" style="--hm: 2" aria-labelledby="launcher-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="launcher-h">The launcher. <span class="muted">Full screen, black, and quick to start.</span></h2>
+      </div>
+      <div class="grid grid--top fill" data-peek>
+        <ul class="rows span-5">
+          <li data-peek-to="home" tabindex="0"><span class="rows__name">Home</span><p>A 3D model of your player, your Mojang cape and the client capes, and one big Start.</p></li>
+          <li data-peek-to="instances" tabindex="0"><span class="rows__name">Instances</span><p>Any version, snapshots too, with Vanilla, Fabric, Quilt, NeoForge or Forge.</p></li>
+          <li data-peek-to="mods" tabindex="0"><span class="rows__name">Mods</span><p>Turn mods on and off, drop in jars, or search Modrinth and install with a checksum.</p></li>
+          <li data-peek-to="settings" tabindex="0"><span class="rows__name">Settings</span><p>RAM up to what the machine has, Java arguments, the game window and themes.</p></li>
+        </ul>
+        <div class="frame frame--photo frame--fill span-6 start-7 win">
+          <img class="frame__img" data-peek-for="home" src="img/launcher-home-800.jpg" srcset="img/launcher-home-800.jpg 800w, img/launcher-home.jpg 1600w" sizes="(min-width: 1024px) 50vw, 100vw" alt="The launcher's Home page" width="1600" height="850" loading="lazy">
+          <img class="frame__img" data-peek-for="instances" src="img/launcher-instances-800.jpg" srcset="img/launcher-instances-800.jpg 800w, img/launcher-instances.jpg 1600w" sizes="(min-width: 1024px) 50vw, 100vw" alt="The launcher's Instances page" width="1600" height="850" loading="lazy" hidden>
+          <img class="frame__img" data-peek-for="mods" src="img/launcher-mods-800.jpg" srcset="img/launcher-mods-800.jpg 800w, img/launcher-mods.jpg 1600w" sizes="(min-width: 1024px) 50vw, 100vw" alt="The launcher's Mods page with a list of installed mods" width="1600" height="850" loading="lazy" hidden>
+          <img class="frame__img" data-peek-for="settings" src="img/launcher-settings-800.jpg" srcset="img/launcher-settings-800.jpg 800w, img/launcher-settings.jpg 1600w" sizes="(min-width: 1024px) 50vw, 100vw" alt="The launcher's Settings page, Game section" width="1600" height="850" loading="lazy" hidden>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ground-surface" id="sharing" aria-labelledby="sharing-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="sharing-h">Other players see your cape. <span class="muted">No server, just the client.</span></h2>
+      </div>
+      <div class="grid fill share">
+        <div class="span-5 stack-4">
+          <p>Your cape and emotes go out as small signed messages through public Nostr relays. Other tux-mc players on the same server pick them up.</p>
+          <p>Each message is signed with the chat key Mojang gives your account, so nobody can put a cape on someone else. Players never connect to each other, and the server address is only sent as a hash.</p>
+        </div>
+        <div class="span-6 start-7 panel lit share__dg">
+          <div class="dg" data-diagram><script type="application/json">{"layout": "bowtie", "alt": "Your cape, your emotes and a hash of the server are signed with your Mojang chat key and sent to three public Nostr relays.", "sources": [{"label": "Cape", "icon": "ui:shirt", "sub": "On join"}, {"label": "Emotes", "icon": "ui:hand", "sub": "6 per 10 s"}, {"label": "Server", "icon": "ui:hash", "sub": "Hashed"}], "core": {"label": "Signed", "icon": "ui:key-round"}, "targets": [{"label": "relay.damus.io", "icon": "ui:radio-tower", "sub": "Relay"}, {"label": "nos.lol", "icon": "ui:radio-tower", "sub": "Relay"}, {"label": "relay.primal.net", "icon": "ui:radio-tower", "sub": "Relay"}]}</script></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install" aria-labelledby="install-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="install-h">Install the launcher and the mod. <span class="muted">You need a Microsoft account that owns Java Edition.</span></h2>
+      </div>
+      <div class="grid fill inst">
+        <div class="span-5 stack-6">
+          <div class="inst__os">
+            <h3>Windows</h3>
+            <p>Download the zip, unzip it and double-click <code>install.bat</code>. It installs Prism Launcher if you don't have it and walks you through signing in.</p>
+            <a class="link" href="https://github.com/sekyuraj/tux-mc/releases/latest/download/tux-mc-windows.zip">Download tux-mc-windows.zip</a>
+          </div>
+          <div class="inst__os">
+            <h3>Linux</h3>
+            <p>Clone github.com/sekyuraj/tux-mc and run <code>install.sh</code>. It needs a C compiler and the gtk4, json-glib and libcurl headers.</p>
+            <a class="link" href="https://github.com/sekyuraj/tux-mc#linux">See the full Linux steps</a>
+          </div>
+        </div>
+        <div class="span-6 start-7 term">
+          <div class="ui ui-panel ui-term" data-ui="terminal-run" role="img" aria-label="A terminal running install.sh: Prism Launcher, the 26.3 instance, the mods, the launcher and the theme">
+            <div class="ui-term__head">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-term__title">tux-mc</span>
+              <span class="ui-meta">sh</span>
+              <span class="ui-spacer"></span>
+            </div>
+            <div class="ui-term__screen" data-term-screen>
+              <div class="ui-term__track" data-term-track>
+                <div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~/src/tux-mc</span><span class="ui-term__sig">$</span><span class="ui-term__typed" data-term-cmd>./install.sh</span></div>
+                <div class="ui-term__ln ui-term__meter" data-term-out data-term-meter><span class="ui-term__bar" style="--p:1"><i></i></span><span class="ui-term__count" data-term-count>5 of 5 steps</span></div>
+                <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">Prism Launcher</span><span class="ui-term__n">AppImage</span></div>
+                <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">Instance 26.3</span><span class="ui-term__n">Fabric</span></div>
+                <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">Fabric API, Sodium, tuxmc.jar</span><span class="ui-term__n">sha512</span></div>
+                <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">~/.local/bin/tux-mc</span><span class="ui-term__n">make install</span></div>
+                <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">Black theme</span><span class="ui-term__n">launcher, Prism</span></div>
+                <div class="ui-term__ln ui-term__done" data-term-out data-term-done><span class="ui-term__ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.3 2.4 2.4 4.6-5"/></svg></span><b>Done</b><span class="ui-term__dim">run tux-mc</span></div>
+                <div class="ui-term__ln ui-term__cmd" data-term-next><span class="ui-term__cwd">~/src/tux-mc</span><span class="ui-term__sig">$</span><span class="ui-term__typed"></span><i class="ui-term__caret" aria-hidden="true"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing footer--statement" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Download tux-mc</h2>
+        <p>Version 1.4.7 for Minecraft 26.3. It keeps itself up to date.</p>
+      </div>
+      <a class="btn btn--primary btn--xl btn--wide" href="https://github.com/sekyuraj/tux-mc/releases/latest">Download tux-mc<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>tux-mc</a>
+          <p class="footer__lede">A Minecraft client and launcher, made on Gentoo.</p>
+        </div>
+        <div class="span-2 footer__col"><h3>Mod</h3><ul><li><a href="#mod">Features</a></li><li><a href="#capes">Capes</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Launcher</h3><ul><li><a href="#launcher">Pages</a></li><li><a href="#install">Install</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Sharing</h3><ul><li><a href="#sharing">How it works</a></li><li><a href="https://nostr.com">Nostr</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Code</h3><ul><li><a href="https://github.com/sekyuraj/tux-mc">GitHub</a></li><li><a href="https://github.com/sekyuraj/tux-mc/releases">Releases</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 sekraj &nbsp; MIT license</span>
+        <span class="t-small">Not affiliated with Mojang or Microsoft. Logos on the capes belong to their projects.</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+<script type="module" src="assets/diagrams/mount.js"></script>
+<script type="module" src="cape.js"></script>
+</body>
+</html>
