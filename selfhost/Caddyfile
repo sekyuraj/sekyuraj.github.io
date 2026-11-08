@@ -6,11 +6,16 @@
 sekraj.duckdns.org {
 	encode zstd gzip
 
-	handle /api/* {
-		reverse_proxy 127.0.0.1:3000
-	}
+	route {
+		# pages switched off in the Servers panel have a marker file here
+		@off file {
+			root /srv/sekraj-off
+			try_files /off-{http.request.uri.path.0}
+		}
+		respond @off "This part of the site is switched off right now." 503
 
-	handle {
+		reverse_proxy /api/* 127.0.0.1:3000
+
 		root * /srv/sekraj
 		file_server
 	}

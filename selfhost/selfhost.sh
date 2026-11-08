@@ -55,6 +55,7 @@ Open http://speedport.ip and log in with the device password
      add one for this PC ($LANIP):
         TCP 80  -> 80
         TCP 443 -> 443
+        TCP 25565 -> 25565   (Minecraft server)
      save.
 
 EOF
