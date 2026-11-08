@@ -3,7 +3,6 @@
 # the Servers panel. Run as tux; it asks for the sudo password. Safe to rerun.
 set -e
 cd "$(dirname "$0")"
-SERVICES="caddy sekraj-api duckdns tuxchan minecraft"
 
 [ "$(id -u)" = 0 ] && { echo "run as tux, not root"; exit 1; }
 command -v ffmpeg >/dev/null || { echo "tuxchan needs ffmpeg (media-video/ffmpeg)"; exit 1; }
@@ -23,17 +22,7 @@ sudo rc-update add tuxchan default >/dev/null
 sudo rc-service tuxchan restart
 
 echo "== Servers panel"
-rule=$(mktemp)
-{
-    echo "# lets the Servers panel (tux-serversd) control these services"
-    for s in $SERVICES; do
-        printf 'tux ALL=(root) NOPASSWD: /usr/bin/rc-service %s start, /usr/bin/rc-service %s stop, /usr/bin/rc-service %s restart, /usr/bin/rc-update add %s, /usr/bin/rc-update del %s\n' \
-            "$s" "$s" "$s" "$s" "$s"
-    done
-} > "$rule"
-sudo visudo -cqf "$rule"
-sudo install -m440 -o root -g root "$rule" /etc/sudoers.d/tux-servers
-rm -f "$rule"
+"$HOME/src/tux-servers/install-sudoers.sh"
 gcc -O2 -march=native -Wall -Wextra -o /tmp/tux-serversd.$$ "$HOME/src/tux-servers/tux-serversd.c"
 install -m755 /tmp/tux-serversd.$$ "$HOME/.local/bin/tux-serversd"
 rm -f /tmp/tux-serversd.$$

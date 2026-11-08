@@ -25,7 +25,7 @@ const STATIC = path.join(__dirname, "static");
 // ---------------------------------------------------------------- config
 
 const DEFAULTS = {
-    title: "tuxchan",
+    title: "chan",
     tagline: "an anonymous image board",
     boards: [
         { id: "b", name: "Random", desc: "anything goes, within the rules", ids: true },

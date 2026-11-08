@@ -16,6 +16,7 @@ sekraj.duckdns.org {
 
 		reverse_proxy /api/* 127.0.0.1:3000
 		reverse_proxy /chan* 127.0.0.1:3001
+		reverse_proxy /cloud* 127.0.0.1:3002
 
 		root * /srv/sekraj
 		file_server

@@ -1,0 +1,25 @@
+#!/sbin/openrc-run
+# sekcloud (sekraj.duckdns.org/cloud/), runs as tux.
+
+description="sekcloud file storage"
+command="/usr/bin/node"
+command_args="/home/tux/src/site/cloud/server.js"
+command_user="tux:tux"
+directory="/home/tux/src/site/cloud"
+supervisor="supervise-daemon"
+respawn_delay=3
+respawn_max=5
+respawn_period=120
+output_log="/var/log/sekcloud.log"
+error_log="/var/log/sekcloud.log"
+supervise_daemon_args="--env HOME=/home/tux --env NODE_ENV=production"
+
+depend() {
+	need net
+	use bitcoind
+	before caddy
+}
+
+start_pre() {
+	checkpath --file --owner tux:tux --mode 0644 /var/log/sekcloud.log
+}
