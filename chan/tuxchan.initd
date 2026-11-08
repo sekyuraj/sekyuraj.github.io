@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+# tuxchan imageboard (sekraj.duckdns.org/chan/), runs as tux.
+
+description="tuxchan imageboard"
+command="/usr/bin/node"
+command_args="/home/tux/src/site/chan/server.js"
+command_user="tux:tux"
+directory="/home/tux/src/site/chan"
+supervisor="supervise-daemon"
+respawn_delay=3
+respawn_max=5
+respawn_period=120
+output_log="/var/log/tuxchan.log"
+error_log="/var/log/tuxchan.log"
+supervise_daemon_args="--env HOME=/home/tux --env NODE_ENV=production"
+
+depend() {
+	need net
+	before caddy
+}
+
+start_pre() {
+	checkpath --file --owner tux:tux --mode 0644 /var/log/tuxchan.log
+}

@@ -15,12 +15,14 @@ sekraj.duckdns.org {
 		respond @off "This part of the site is switched off right now." 503
 
 		reverse_proxy /api/* 127.0.0.1:3000
+		reverse_proxy /chan* 127.0.0.1:3001
 
 		root * /srv/sekraj
 		file_server
 	}
 
-	log {
-		output file /var/log/caddy/access.log
+	# the board (tuxchan) or the backend is stopped
+	handle_errors 502 {
+		respond "This part of the site is switched off right now." 503
 	}
 }

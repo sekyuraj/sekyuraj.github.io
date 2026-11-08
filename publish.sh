@@ -12,7 +12,7 @@ git add -A
 git commit -qm "update site" 2>/dev/null || echo "nothing new to commit"
 
 git ls-files \
-  | grep -vE '^(CNAME|\.gitignore|\.nojekyll|[^/]*\.sh|tools/|selfhost/|server/)' \
+  | grep -vE '^(CNAME|\.gitignore|\.nojekyll|[^/]*\.sh|tools/|selfhost/|server/|chan/)' \
   | rsync -a --files-from=- ./ /srv/sekraj/
 # --files-from doesn't delete; clear out files that are gone from git
 ( cd /srv/sekraj && find . -type f | sed 's|^\./||' ) | while read -r f; do
