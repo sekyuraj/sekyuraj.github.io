@@ -23,10 +23,8 @@ sudo rc-service tuxchan restart
 
 echo "== Servers panel"
 "$HOME/src/tux-servers/install-sudoers.sh"
-gcc -O2 -march=native -Wall -Wextra -o /tmp/tux-serversd.$$ "$HOME/src/tux-servers/tux-serversd.c"
-install -m755 /tmp/tux-serversd.$$ "$HOME/.local/bin/tux-serversd"
-rm -f /tmp/tux-serversd.$$
-pkill -x tux-serversd 2>/dev/null || true   # the panel starts the new one next time it opens
+make -C "$HOME/src/tux-servers" install
+pkill -x web-control-ce 2>/dev/null || true   # the panel starts the new one next time it opens
 
 echo "== website"
 sudo install -Dm644 ../selfhost/Caddyfile /etc/caddy/Caddyfile

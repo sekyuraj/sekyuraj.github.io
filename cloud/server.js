@@ -57,6 +57,24 @@ if (process.argv[2] === "setup-wallet") {
 
 const { st } = open(DATA);
 
+// node server.js add-user NAME   free account for the owner, prints a random password
+if (process.argv[2] === "add-user") {
+    const name = process.argv[3] || "";
+    if (!/^[A-Za-z0-9_.-]{3,32}$/.test(name)) {
+        console.error("usage: node server.js add-user NAME (3-32 letters, numbers, . _ -)");
+        process.exit(1);
+    }
+    if (st.userByName.get(name)) {
+        console.error("that username is taken");
+        process.exit(1);
+    }
+    const pass = crypto.randomBytes(12).toString("base64url");
+    const id = st.addUser.get(name, hashPass(pass), Date.now(), QUOTA).id;
+    fs.mkdirSync(path.join(DATA, "files", String(id)), { recursive: true, mode: 0o700 });
+    console.log(`account ${name} created, password: ${pass}`);
+    process.exit(0);
+}
+
 // ---------------------------------------------------------------- wallet setup
 
 async function setupWallet(key) {
