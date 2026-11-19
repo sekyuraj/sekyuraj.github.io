@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+# sekmail (sekraj.duckdns.org/mail/ + SMTP on :25), runs as tux.
+
+description="sekmail mail server and webmail"
+command="/usr/local/bin/sekmaild"
+command_user="tux:tux"
+directory="/home/tux"
+supervisor="supervise-daemon"
+capabilities="^cap_net_bind_service"
+respawn_delay=3
+respawn_max=5
+respawn_period=120
+output_log="/var/log/sekmail.log"
+error_log="/var/log/sekmail.log"
+supervise_daemon_args="--env HOME=/home/tux"
+
+depend() {
+	need net
+	before caddy
+}
+
+start_pre() {
+	checkpath --file --owner tux:tux --mode 0644 /var/log/sekmail.log
+}

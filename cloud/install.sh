@@ -65,7 +65,7 @@ EOF
         fs.writeFileSync(f, JSON.stringify(c, null, 2) + "\n", { mode: 0o600 });' "$DATA/config.json" "$RPCPASS"
     RESTART=1
 fi
-sudo rc-update add bitcoind default >/dev/null
+# bitcoind is not started at boot (start it in the Web Control Center)
 # Gentoo's bitcoind service reports "inactive" (non-zero) while it starts;
 # the RPC wait below is the real check
 if [ -n "$RESTART" ]; then sudo rc-service bitcoind restart || true; else sudo rc-service bitcoind start || true; fi
