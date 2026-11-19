@@ -2,8 +2,8 @@
 # sekcloud (sekraj.duckdns.org/cloud/), runs as tux.
 
 description="sekcloud file storage"
-command="/usr/bin/node"
-command_args="/home/tux/src/site/cloud/server.js"
+command="/usr/local/bin/tux-jail"
+command_args="sekcloud /usr/bin/node /home/tux/src/site/cloud/server.js"
 command_user="tux:tux"
 directory="/home/tux/src/site/cloud"
 supervisor="supervise-daemon"

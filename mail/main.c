@@ -2,6 +2,7 @@
      sekmaild               run (SMTP in on :25, webmail on 127.0.0.1:3003)
      sekmaild adduser NAME  make an account (password on stdin), may use reserved names
      sekmaild passwd NAME   set a password (stdin) */
+#include "queue.h"
 #include "smtp.h"
 #include "store.h"
 #include "util.h"
@@ -106,6 +107,7 @@ int main(int argc, char **argv)
     if (ls[0] < 0 && strchr(cfg.smtp_bind, ':')) ls[0] = listen_tcp("0.0.0.0", cfg.smtp_port);
     ls[1] = listen_tcp("127.0.0.1", cfg.http_port);
     if (ls[0] < 0 || ls[1] < 0) return 1;
+    queue_start();
     logmsg("sekmail for %s: smtp :%d, web 127.0.0.1:%d", cfg.domain, cfg.smtp_port, cfg.http_port);
 
     struct pollfd pf[2] = {{ls[0], POLLIN, 0}, {ls[1], POLLIN, 0}};

@@ -391,6 +391,11 @@ static void walk(const char *p, const char *end, int depth, const char *deftype,
         for (char *c = pt->filename; *c; c++)
             if (*c == '/' || *c == '\\') *c = '_';
     }
+    if (cd) {
+        char *fname = hparam(cd, "name");
+        if (fname) snprintf(pt->name, sizeof pt->name, "%s", fname);
+        free(fname);
+    }
     pt->attach = (cd && !strncasecmp(cd, "attachment", 10)) || pt->filename || strncmp(type, "text/", 5);
     pt->body = body;
     pt->len = end - body;

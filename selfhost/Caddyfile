@@ -6,6 +6,16 @@
 sekraj.duckdns.org {
 	encode zstd gzip
 
+	# security headers; "?" = only when the app didn't set its own
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		?X-Content-Type-Options "nosniff"
+		?Referrer-Policy "strict-origin-when-cross-origin"
+		?X-Frame-Options "SAMEORIGIN"
+		?Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		-Server
+	}
+
 	route {
 		# pages switched off in the Servers panel have a marker file here
 		@off file {
@@ -14,10 +24,26 @@ sekraj.duckdns.org {
 		}
 		respond @off "This part of the site is switched off right now." 503
 
+		# hosted sites: /~name/ from /srv/sekhost/name. The sandbox CSP gives
+		# every page a null origin, so its scripts can't touch logins here.
+		@nosl path_regexp ^/~[a-z0-9._-]+$
+		redir @nosl {path}/ 308
+		@sites path /~*
+		route @sites {
+			header Content-Security-Policy "sandbox allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+			header X-Content-Type-Options nosniff
+			uri strip_prefix /~
+			root * /srv/sekhost
+			file_server {
+				hide .*
+			}
+		}
+
 		reverse_proxy /api/* 127.0.0.1:3000
 		reverse_proxy /chan* 127.0.0.1:3001
 		reverse_proxy /cloud* 127.0.0.1:3002
 		reverse_proxy /mail* 127.0.0.1:3003
+		reverse_proxy /host* 127.0.0.1:3003
 
 		root * /srv/sekraj
 		file_server

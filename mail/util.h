@@ -36,6 +36,8 @@ struct config {
     int signups_per_ip;     /* per day */
     int sends_per_day;
     char admin[32];         /* gets postmaster@ and abuse@ */
+    char host_dir[512];     /* where hosted sites live (Caddy serves /~name/ from here) */
+    long host_quota_mb;
     char relay_url[512], relay_user[256], relay_pass[256], relay_from[256];
 };
 extern struct config cfg;

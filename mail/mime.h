@@ -25,6 +25,7 @@ struct part {
     char charset[48];
     char enc[32];
     char *filename;
+    char name[64];   /* form-data field name */
     const char *body;
     size_t len;
     int attach;

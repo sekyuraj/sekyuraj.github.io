@@ -2,8 +2,8 @@
 # tuxchan imageboard (sekraj.duckdns.org/chan/), runs as tux.
 
 description="tuxchan imageboard"
-command="/usr/bin/node"
-command_args="/home/tux/src/site/chan/server.js"
+command="/usr/local/bin/tux-jail"
+command_args="tuxchan /usr/bin/node /home/tux/src/site/chan/server.js"
 command_user="tux:tux"
 directory="/home/tux/src/site/chan"
 supervisor="supervise-daemon"

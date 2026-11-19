@@ -223,6 +223,8 @@ void config_load(void)
     cfg.signups = 1;
     cfg.signups_per_ip = 3;
     cfg.sends_per_day = 100;
+    setstr(cfg.host_dir, sizeof cfg.host_dir, "/srv/sekhost");
+    cfg.host_quota_mb = 50;
 
     char path[1100];
     snprintf(path, sizeof path, "%s/config", cfg.dir);
@@ -245,6 +247,8 @@ void config_load(void)
         else if (!strcmp(k, "signups")) cfg.signups = !strcmp(v, "open") || !strcmp(v, "1");
         else if (!strcmp(k, "signups_per_ip")) cfg.signups_per_ip = atoi(v);
         else if (!strcmp(k, "sends_per_day")) cfg.sends_per_day = atoi(v);
+        else if (!strcmp(k, "host_dir")) setstr(cfg.host_dir, sizeof cfg.host_dir, v);
+        else if (!strcmp(k, "host_quota_mb")) cfg.host_quota_mb = atol(v);
         else if (!strcmp(k, "admin")) setstr(cfg.admin, sizeof cfg.admin, v);
         else if (!strcmp(k, "relay_url")) setstr(cfg.relay_url, sizeof cfg.relay_url, v);
         else if (!strcmp(k, "relay_user")) setstr(cfg.relay_user, sizeof cfg.relay_user, v);

@@ -1,11 +1,12 @@
 /* webmail at /mail/, behind Caddy on 127.0.0.1 */
 #include "mime.h"
+#include "queue.h"
 #include "smtp.h"
 #include "store.h"
 #include "util.h"
+#include "web.h"
 
 #include <ctype.h>
-#include <curl/curl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,19 +15,8 @@
 #include <unistd.h>
 
 #define MAX_BODY (2 << 20)
+#define MAX_UPLOAD (30 << 20)
 
-struct req {
-    char method[8];
-    char path[1024];
-    char *query;
-    char tok[65];
-    char ip[64];
-    char origin[256];
-    char *body;
-    size_t blen;
-    char user[32];
-    int fd;
-};
 
 /* ---------- sessions and limits (in memory, a restart logs people out) */
 
@@ -43,7 +33,7 @@ static struct counter {
 } counters[2048];
 
 /* counts one event for key in a window; returns the count so far */
-static int bump(const char *kind, const char *who, long window, int add)
+int bump(const char *kind, const char *who, long window, int add)
 {
     char key[64];
     snprintf(key, sizeof key, "%s:%s", kind, who);
@@ -122,12 +112,12 @@ static const char *status_text(int c)
     }
 }
 
-static void respond(int fd, int code, const char *ctype, const char *extra, const void *body, size_t n)
+void respond(int fd, int code, const char *ctype, const char *extra, const void *body, size_t n)
 {
     buf h = {0};
     bprintf(&h,
             "HTTP/1.1 %d %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\nConnection: close\r\n"
-            "Cache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\n%s\r\n",
+            "Cache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: same-origin\r\n%s\r\n",
             code, status_text(code), ctype, n, extra ? extra : "");
     write_all(fd, h.p, h.n);
     write_all(fd, body, n);
@@ -138,7 +128,7 @@ static const char *page_csp =
     "Content-Security-Policy: default-src 'none'; style-src 'self'; img-src 'self'; form-action 'self'; "
     "frame-ancestors 'none'; base-uri 'none'\r\n";
 
-static void send_page(struct req *r, int code, buf *b, const char *extra)
+void send_page(struct req *r, int code, buf *b, const char *extra)
 {
     buf h = {0};
     bputs(&h, page_csp);
@@ -148,7 +138,7 @@ static void send_page(struct req *r, int code, buf *b, const char *extra)
     bfree(&h);
 }
 
-static void redirect(struct req *r, const char *to, const char *extra)
+void redirect(struct req *r, const char *to, const char *extra)
 {
     buf h = {0};
     bprintf(&h, "Location: %s\r\n%s", to, extra ? extra : "");
@@ -165,7 +155,7 @@ static int unread(const char *user)
     return u;
 }
 
-static void page_head(buf *b, struct req *r, const char *title)
+void page_head(buf *b, struct req *r, const char *title)
 {
     int u = r->user[0] ? unread(r->user) : 0;
     bputs(b, "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
@@ -178,7 +168,7 @@ static void page_head(buf *b, struct req *r, const char *title)
         bprintf(b, "<a href=\"/mail/\">inbox%s", u ? " " : "");
         if (u) bprintf(b, "(%d)", u);
         bputs(b, "</a><a href=\"/mail/sent\">sent</a><a href=\"/mail/write\">write</a>"
-                 "<a href=\"/mail/settings\">settings</a><span class=\"me\">");
+                 "<a href=\"/mail/settings\">settings</a><a href=\"/host/\">website</a><span class=\"me\">");
         besc(b, r->user);
         bprintf(b, "@%s</span><form class=\"inline\" method=\"post\" action=\"/mail/logout\">"
                    "<button>log out</button></form>", cfg.domain);
@@ -255,13 +245,13 @@ static int same_origin(struct req *r)
     return !strncmp(r->origin, "http://127.0.0.1:", 17) || !strncmp(r->origin, "http://localhost:", 17);
 }
 
-static char *field(struct req *r, const char *k)
+char *field(struct req *r, const char *k)
 {
     char *v = form_get(r->body, k);
     return v ? v : strdup("");
 }
 
-static char *qfield(struct req *r, const char *k)
+char *qfield(struct req *r, const char *k)
 {
     char *v = form_get(r->query, k);
     return v ? v : strdup("");
@@ -269,12 +259,31 @@ static char *qfield(struct req *r, const char *k)
 
 static void login_cookie(char *out, size_t n, const char *tok)
 {
-    snprintf(out, n, "Set-Cookie: sm=%s; Path=/mail; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000\r\n", tok);
+    snprintf(out, n, "Set-Cookie: __Host-sm=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000\r\n", tok);
+}
+
+void urlenc(buf *b, const char *s)
+{
+    for (const unsigned char *c = (const unsigned char *)s; *c; c++)
+        if (isalnum(*c) || strchr("-._~", *c)) bput(b, c, 1);
+        else bprintf(b, "%%%02X", *c);
+}
+
+void request_link(buf *b, const char *user)
+{
+    char body[600];
+    snprintf(body, sizeof body,
+             "Hi %s,\n\nI'd like a website at https://%s/~%s/\n\nWhat it's going to be:\n\n",
+             cfg.admin, cfg.domain, user);
+    bprintf(b, "/mail/write?to=%s%%40", cfg.admin);
+    urlenc(b, cfg.domain);
+    bputs(b, "&s=Website%20request&b=");
+    urlenc(b, body);
 }
 
 /* ---------- login / signup */
 
-static void page_login(struct req *r, const char *err, const char *name)
+static void page_login(struct req *r, const char *err, const char *name, const char *next)
 {
     buf b = {0};
     page_head(&b, r, "log in");
@@ -286,7 +295,9 @@ static void page_login(struct req *r, const char *err, const char *name)
         besc(&b, err);
         bputs(&b, "</p>");
     }
-    bputs(&b, "<form method=\"post\" action=\"/mail/login\"><label for=\"u\">name</label>"
+    bputs(&b, "<form method=\"post\" action=\"/mail/login\"><input type=\"hidden\" name=\"next\" value=\"");
+    besc(&b, next);
+    bputs(&b, "\"><label for=\"u\">name</label>"
               "<input type=\"text\" id=\"u\" name=\"u\" autocomplete=\"username\" autocapitalize=\"none\" value=\"");
     besc(&b, name);
     bputs(&b, "\" required autofocus><label for=\"p\">password</label>"
@@ -300,29 +311,37 @@ static void page_login(struct req *r, const char *err, const char *name)
 
 static void do_login(struct req *r)
 {
-    char *u = field(r, "u"), *p = field(r, "p");
+    char *u = field(r, "u"), *p = field(r, "p"), *next = field(r, "next");
+    /* only our own pages, never another site */
+    if (strncmp(next, "/host/", 6) && strncmp(next, "/mail/", 6)) { free(next); next = strdup("/mail/"); }
+    for (char *c = next; *c; c++) if ((unsigned char)*c < 33 || *c == '\\') *c = '_';
     lower(u);
     trim(u);
     u[strcspn(u, "@")] = 0;
-    if (bump("fail", r->ip, 900, 0) >= 10) page_login(r, "Too many tries. Wait 15 minutes.", u);
+    if (bump("fail", r->ip, 900, 0) >= 10) page_login(r, "Too many tries. Wait 15 minutes.", u, next);
     else if (!user_check(u, p)) {
         bump("fail", r->ip, 900, 1);
-        page_login(r, "Wrong name or password.", u);
+        page_login(r, "Wrong name or password.", u, next);
     } else {
         char tok[65], ck[200];
         sess_new(u, tok);
         login_cookie(ck, sizeof ck, tok);
-        redirect(r, "/mail/", ck);
+        redirect(r, next, ck);
     }
     free(u);
     free(p);
+    free(next);
 }
 
-static void page_signup(struct req *r, const char *err, const char *name)
+static void page_signup(struct req *r, const char *err, const char *name, const char *next)
 {
     buf b = {0};
     page_head(&b, r, "sign up");
     bputs(&b, "<div class=\"box\"><h1>get an address</h1>");
+    int host = !strcmp(next, "host");
+    if (host)
+        bprintf(&b, "<p>Websites here are for people with a mail address @%s. Make one, then you'll write "
+                    "%s a short note about your site.</p>", cfg.domain, *cfg.admin ? cfg.admin : "the admin");
     if (!cfg.signups) {
         bputs(&b, "<p>Sign-ups are closed right now.</p></div>");
         send_page(r, 200, &b, NULL);
@@ -334,10 +353,11 @@ static void page_signup(struct req *r, const char *err, const char *name)
         besc(&b, err);
         bputs(&b, "</p>");
     }
-    bprintf(&b, "<form method=\"post\" action=\"/mail/signup\"><label for=\"u\">name (you get name@%s)</label>"
+    bprintf(&b, "<form method=\"post\" action=\"/mail/signup\"><input type=\"hidden\" name=\"next\" value=\"%s\">"
+                "<label for=\"u\">name (you get name@%s)</label>"
                 "<input type=\"text\" id=\"u\" name=\"u\" autocomplete=\"username\" autocapitalize=\"none\" "
                 "maxlength=\"24\" value=\"",
-            cfg.domain);
+            host ? "host" : "", cfg.domain);
     besc(&b, name);
     bputs(&b, "\" required autofocus><label for=\"p\">password (8 or more characters)</label>"
               "<input type=\"password\" id=\"p\" name=\"p\" autocomplete=\"new-password\" minlength=\"8\" required>"
@@ -352,7 +372,8 @@ static void page_signup(struct req *r, const char *err, const char *name)
 
 static void do_signup(struct req *r)
 {
-    char *u = field(r, "u"), *p = field(r, "p"), *p2 = field(r, "p2"), *hp = field(r, "website");
+    char *u = field(r, "u"), *p = field(r, "p"), *p2 = field(r, "p2"), *hp = field(r, "website"),
+         *next = field(r, "next");
     lower(u);
     trim(u);
     const char *err = NULL;
@@ -368,19 +389,25 @@ static void do_signup(struct req *r)
         if (k == -1) err = "That name is taken.";
         else if (k) err = "Couldn't save the account. Try again later.";
     }
-    if (err) page_signup(r, err, u);
+    if (err) page_signup(r, err, u, next);
     else {
         bump("signup", r->ip, 86400, 1);
         logmsg("signup %s from %s", u, r->ip);
         char tok[65], ck[200];
         sess_new(u, tok);
         login_cookie(ck, sizeof ck, tok);
-        redirect(r, "/mail/", ck);
+        if (!strcmp(next, "host") && *cfg.admin) {
+            buf l = {0};
+            request_link(&l, u);
+            redirect(r, l.p, ck);
+            bfree(&l);
+        } else redirect(r, "/mail/", ck);
     }
     free(u);
     free(p);
     free(p2);
     free(hp);
+    free(next);
 }
 
 /* ---------- folders */
@@ -394,6 +421,8 @@ static void page_list(struct req *r, const char *folder)
     page_head(&b, r, folder);
     char *note = qfield(r, "n");
     if (!strcmp(note, "sent")) bputs(&b, "<p class=\"ok\">Sent.</p>");
+    if (!strcmp(note, "queued"))
+        bputs(&b, "<p class=\"ok\">Sending. If it can't be delivered you'll get a note in your inbox.</p>");
     if (!strcmp(note, "deleted")) bputs(&b, "<p class=\"ok\">Deleted.</p>");
     free(note);
     if (!n) {
@@ -637,10 +666,7 @@ static void page_write(struct req *r, const char *err, const char *to, const cha
     besc(&b, body);
     bputs(&b, "</textarea><input type=\"hidden\" name=\"irt\" value=\"");
     besc(&b, irt);
-    bputs(&b, "\"><div class=\"bar\"><button>send</button>");
-    if (!*cfg.relay_url)
-        bprintf(&b, "<span class=\"muted\">Only addresses @%s work for now.</span>", cfg.domain);
-    bputs(&b, "</div></form>");
+    bputs(&b, "\"><div class=\"bar\"><button>send</button></div></form>");
     send_page(r, err ? 400 : 200, &b, NULL);
     bfree(&b);
 }
@@ -684,7 +710,12 @@ static void write_form(struct req *r)
         free(from);
         free(text);
         free_msg(&L);
-    } else page_write(r, NULL, to, "", "", "");
+    } else {
+        char *qs = qfield(r, "s"), *qb = qfield(r, "b");
+        page_write(r, NULL, to, qs, qb, "");
+        free(qs);
+        free(qb);
+    }
     free(re);
     free(to);
 }
@@ -711,59 +742,6 @@ static void subject_header(buf *b, const char *s)
         i += k;
     }
     bputs(b, "\r\n");
-}
-
-struct up {
-    const char *p;
-    size_t left;
-};
-
-static size_t up_read(char *dst, size_t size, size_t nmemb, void *ud)
-{
-    struct up *u = ud;
-    size_t n = size * nmemb < u->left ? size * nmemb : u->left;
-    memcpy(dst, u->p, n);
-    u->p += n;
-    u->left -= n;
-    return n;
-}
-
-static int relay_send(const char *from, char ext[][320], int next, const buf *msg, char *err, size_t errn)
-{
-    CURL *c = curl_easy_init();
-    if (!c) return -1;
-    struct curl_slist *rc = NULL;
-    for (int i = 0; i < next; i++) {
-        char a[330];
-        snprintf(a, sizeof a, "<%s>", ext[i]);
-        rc = curl_slist_append(rc, a);
-    }
-    char mf[330];
-    snprintf(mf, sizeof mf, "<%s>", *cfg.relay_from ? cfg.relay_from : from);
-    struct up u = {msg->p, msg->n};
-    char eb[CURL_ERROR_SIZE] = "";
-    curl_easy_setopt(c, CURLOPT_URL, cfg.relay_url);
-    curl_easy_setopt(c, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
-    if (*cfg.relay_user) {
-        curl_easy_setopt(c, CURLOPT_USERNAME, cfg.relay_user);
-        curl_easy_setopt(c, CURLOPT_PASSWORD, cfg.relay_pass);
-    }
-    curl_easy_setopt(c, CURLOPT_MAIL_FROM, mf);
-    curl_easy_setopt(c, CURLOPT_MAIL_RCPT, rc);
-    curl_easy_setopt(c, CURLOPT_READFUNCTION, up_read);
-    curl_easy_setopt(c, CURLOPT_READDATA, &u);
-    curl_easy_setopt(c, CURLOPT_UPLOAD, 1L);
-    curl_easy_setopt(c, CURLOPT_TIMEOUT, 60L);
-    curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
-    curl_easy_setopt(c, CURLOPT_ERRORBUFFER, eb);
-    CURLcode res = curl_easy_perform(c);
-    curl_slist_free_all(rc);
-    curl_easy_cleanup(c);
-    if (res != CURLE_OK) {
-        snprintf(err, errn, "%s", *eb ? eb : curl_easy_strerror(res));
-        return -1;
-    }
-    return 0;
 }
 
 static void do_write(struct req *r)
@@ -801,10 +779,6 @@ static void do_write(struct req *r)
             int dup = 0;
             for (int i = 0; i < nl; i++) dup |= !strcmp(local[i], local[nl]);
             if (!dup) nl++;
-        } else if (!*cfg.relay_url) {
-            snprintf(err, sizeof err,
-                     "Mail to other servers can't go out yet (this connection blocks outgoing port 25). "
-                     "Addresses @%s work.", cfg.domain);
         } else snprintf(ext[ne++], sizeof ext[0], "%s", a);
     }
     free(tmp);
@@ -846,11 +820,8 @@ static void do_write(struct req *r)
     }
     if (col) bputs(&m, "\r\n");
 
-    if (ne && relay_send(from, ext, ne, &m, err, sizeof err) < 0) {
-        logmsg("relay failed for %s: %s", r->user, err);
-        char e2[500];
-        snprintf(e2, sizeof e2, "Sending to the outside failed: %.300s. Nothing was sent.", err);
-        page_write(r, e2, to, subj, body, irt);
+    if (ne && queue_add(from, ext, ne, m.p, m.n) < 0) {
+        page_write(r, "Couldn't queue the message. Try again later.", to, subj, body, irt);
         bfree(&m);
         goto out;
     }
@@ -864,7 +835,14 @@ static void do_write(struct req *r)
     logmsg("web %s: sent to %d local, %d outside", r->user, nl, ne);
     bfree(&in);
     bfree(&m);
-    redirect(r, "/mail/sent?n=sent", NULL);
+    int asked = 0;
+    if (*cfg.admin && strcasestr(subj, "website request") && strcmp(r->user, cfg.admin))
+        for (int i = 0; i < nl; i++)
+            if (!strcmp(local[i], cfg.admin)) asked = 1;
+    if (asked) {
+        host_request(r->user);
+        redirect(r, "/host/?n=asked", NULL);
+    } else redirect(r, ne ? "/mail/sent?n=queued" : "/mail/sent?n=sent", NULL);
 out:
     free(to);
     free(subj);
@@ -949,13 +927,13 @@ static int read_req(int fd, struct req *r, buf *raw)
             /* Caddy sets this; the first entry is the client */
             snprintf(r->ip, sizeof r->ip, "%.*s", (int)strcspn(v, ", "), v);
         } else if (!strcasecmp(h, "origin")) snprintf(r->origin, sizeof r->origin, "%s", v);
+        else if (!strcasecmp(h, "content-type")) snprintf(r->ctype, sizeof r->ctype, "%s", v);
         else if (!strcasecmp(h, "cookie")) {
-            char *c = strstr(v, "sm=");
-            while (c && c != v && c[-1] != ' ' && c[-1] != ';') c = strstr(c + 1, "sm=");
-            if (c) snprintf(r->tok, sizeof r->tok, "%.*s", (int)strcspn(c + 3, "; "), c + 3);
+            char *c = strstr(v, "__Host-sm=");
+            if (c) snprintf(r->tok, sizeof r->tok, "%.*s", (int)strcspn(c + 10, "; "), c + 10);
         }
     }
-    if (clen < 0 || clen > MAX_BODY) return -2;
+    if (clen < 0 || clen > (!strncmp(r->path, "/host/upload", 12) ? MAX_UPLOAD : MAX_BODY)) return -2;
     size_t have = raw->n - (body - raw->p);
     size_t off = body - raw->p;
     while (have < (size_t)clen) {
@@ -982,6 +960,11 @@ void handle_http(int fd)
     int post = !strcmp(r.method, "POST");
     const char *p = r.path;
 
+    if (!strncmp(p, "/host", 5) && (!p[5] || p[5] == '/')) {
+        if (post && !same_origin(&r)) respond(fd, 403, "text/plain", NULL, "bad origin\n", 11);
+        else host_route(&r, p + 5, post);
+        goto done;
+    }
     if (strncmp(p, "/mail", 5)) {
         respond(fd, 404, "text/plain", NULL, "not found\n", 10);
         goto done;
@@ -999,22 +982,26 @@ void handle_http(int fd)
     if (!strcmp(p, "/login")) {
         if (post) do_login(&r);
         else if (r.user[0]) redirect(&r, "/mail/", NULL);
-        else page_login(&r, NULL, "");
+        else page_login(&r, NULL, "", "/mail/");
         goto done;
     }
     if (!strcmp(p, "/signup")) {
         if (post) do_signup(&r);
-        else page_signup(&r, NULL, "");
+        else {
+            char *nx = qfield(&r, "next");
+            page_signup(&r, NULL, "", nx);
+            free(nx);
+        }
         goto done;
     }
     if (!r.user[0]) {
-        if (!strcmp(p, "/")) page_login(&r, NULL, "");
+        if (!strcmp(p, "/")) page_login(&r, NULL, "", "/mail/");
         else redirect(&r, "/mail/login", NULL);
         goto done;
     }
     if (!strcmp(p, "/logout") && post) {
         sess_drop(r.tok);
-        redirect(&r, "/mail/login", "Set-Cookie: sm=; Path=/mail; HttpOnly; Secure; SameSite=Lax; Max-Age=0\r\n");
+        redirect(&r, "/mail/login", "Set-Cookie: __Host-sm=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0\r\n");
         goto done;
     }
     if (!strcmp(p, "/")) { page_list(&r, "inbox"); goto done; }

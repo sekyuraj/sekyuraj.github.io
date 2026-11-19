@@ -2,8 +2,8 @@
 # Node backend for sekraj.duckdns.org (/api/*), runs as tux.
 
 description="sekraj.duckdns.org API (node)"
-command="/usr/bin/node"
-command_args="/home/tux/src/site/server/server.js"
+command="/usr/local/bin/tux-jail"
+command_args="sekraj-api /usr/bin/node /home/tux/src/site/server/server.js"
 command_user="tux:tux"
 directory="/home/tux/src/site/server"
 supervisor="supervise-daemon"
