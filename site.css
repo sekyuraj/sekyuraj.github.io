@@ -1,0 +1,62 @@
+/* Hallmark · shape: a signpost: the flagship shot first, then a plain index of the other services · genre: atmospheric · theme: custom · job: try · idea: "the front door of a one-person site: the newest thing made here, shown as a frame from it, then everything else by name" · vibe: "dusk, lantern light, handmade, honest"
+ * paper: oklch(15% 0.012 60) · accent: oklch(76% 0.13 70) · display: Special Elite · body: Host Grotesk · hero: a frame from The Rake (the cabin, the figure in the trees) with the title over its lower edge · nav: wordmark and four plain links · footer: one line on where it runs · imagery: frames filmed in the game · signature: the hero is a real frame from the game, the same one the trail page stops on
+ * axes: dark/typewriter-slab/warm · posture: one accent (the lantern amber), shared with /rake/ · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R5 V4 · weakest: P, a hub page has little to argue; let the Rake frame carry it and kept the rest to names and one line each */
+@import url("/fonts/fonts.css");
+@import url("/site-tokens.css");
+@import url("/site-base.css");
+
+:root {
+  --color-paper: oklch(15% 0.012 60); --color-paper-2: oklch(19% 0.014 60); --color-paper-3: oklch(24% 0.016 60);
+  --color-ink: oklch(92% 0.022 85); --color-ink-2: oklch(84% 0.022 85); --color-muted: oklch(72% 0.02 80);
+  --color-rule: oklch(30% 0.014 65);
+  --color-accent: oklch(76% 0.13 70); --color-accent-hover: oklch(82% 0.13 75); --color-accent-ink: oklch(17% 0.02 60); --color-focus: oklch(86% 0.12 80);
+  --color-shade: oklch(10% 0.01 60); --color-scrim: oklch(10% 0.01 60 / 0.82); --color-scrim-0: oklch(10% 0.01 60 / 0);
+  --font-display: "Special Elite", ui-monospace, monospace;
+  --font-body: "Host Grotesk", system-ui, sans-serif;
+  --container: 1240px;
+}
+
+body { font-size: var(--text-lead); line-height: 1.5; }
+a:hover { text-decoration-thickness: 2px; }
+
+/* ---------- top ---------- */
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-lg); padding-block: var(--space-lg); flex-wrap: wrap; }
+.mark { font-family: var(--font-display); font-size: var(--text-xl); text-decoration: none; }
+.top__nav { display: flex; gap: var(--space-lg); flex-wrap: wrap; font-size: var(--text-md); }
+.top__nav a { color: var(--color-ink-2); text-decoration: none; }
+.top__nav a:hover { color: var(--color-ink); text-decoration: underline; }
+
+/* ---------- the Rake ---------- */
+.lead { position: relative; display: grid; }
+.lead__shot { display: block; grid-area: 1 / 1; border-radius: var(--radius-card); overflow: hidden; background: var(--color-shade); }
+.lead__shot img { width: 100%; height: auto; }
+.lead__shot { box-shadow: 0 0 0 0 var(--color-accent); transition: box-shadow var(--dur-short) var(--ease-out); }
+.lead__shot:hover { box-shadow: 0 0 0 2px var(--color-accent); }
+.lead__text { grid-area: 1 / 1; align-self: end; padding: var(--space-2xl) var(--space-xl) var(--space-xl); max-width: 36rem; position: relative; z-index: var(--z-base); pointer-events: none; }
+.lead__text a { pointer-events: auto; }
+.lead::after { content: ""; grid-area: 1 / 1; border-radius: var(--radius-card); background: linear-gradient(to top right, var(--color-scrim), var(--color-scrim-0) 60%); pointer-events: none; }
+.lead h1 { font-size: var(--text-display); font-weight: 400; line-height: 1; letter-spacing: var(--tracking-display); }
+.lead p { margin-top: var(--space-md); color: var(--color-ink-2); }
+
+.go { display: inline-block; margin-top: var(--space-lg); padding: var(--space-sm) var(--space-lg); border-radius: var(--radius-card); background: var(--color-accent); color: var(--color-accent-ink); text-decoration: none; font-weight: 600; font-size: var(--text-md); transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.go:hover { background: var(--color-accent-hover); }
+.go:active { transform: translateY(1px); }
+
+/* ---------- the rest ---------- */
+.also { padding-block: var(--space-3xl) var(--space-2xl); }
+.also h2 { font-family: var(--font-body); font-size: var(--text-md); font-weight: 400; color: var(--color-muted); margin-bottom: var(--space-xl); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-xl); }
+.list li { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); align-items: baseline; }
+.list__name { font-family: var(--font-display); font-size: var(--text-section); line-height: 1.1; text-decoration: none; }
+.list__name:hover { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 2px; }
+.list p { color: var(--color-ink-2); max-width: 46ch; }
+
+.foot { padding-block: var(--space-xl) var(--space-2xl); color: var(--color-muted); font-size: var(--text-md); }
+
+@media (max-width: 60rem) {
+  .lead { display: block; }
+  .lead::after { display: none; }
+  .lead__text { padding: var(--space-lg) 0 0; max-width: none; pointer-events: auto; }
+  .list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xs); }
+}

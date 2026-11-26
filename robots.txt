@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /chan/mod
+Disallow: /host/admin
+Disallow: /bios.html

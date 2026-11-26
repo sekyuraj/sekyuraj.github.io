@@ -4,22 +4,64 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>sekraj</title>
-<style>
-  body { background:#111; color:#ddd; font:16px/1.5 monospace; margin:0; padding:3rem 1rem; }
-  main { max-width:40rem; margin:0 auto; }
-  h1 { color:#fff; font-size:1.6rem; margin:0 0 .5rem; }
-  a { color:#8ab4f8; }
-</style>
+<meta name="description" content="The Rake, a Roblox horror game, plus a Minecraft client, an image board, email and small websites. All of it runs on one home PC.">
+<meta name="theme-color" content="#16120e">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/rake/f/096.webp" as="image">
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
+<header class="top container">
+  <a class="mark" href="/" aria-current="page">sekraj</a>
+  <nav class="top__nav" aria-label="Sections">
+    <a href="/rake/">The Rake</a>
+    <a href="/tux-mc/">tux-mc</a>
+    <a href="/chan/">chan</a>
+    <a href="/mail/">mail</a>
+  </nav>
+</header>
+
 <main>
-  <h1>sekraj</h1>
-  <p>nothing much here yet.</p>
-  <p><a href="tux-mc/">tux-mc</a>: a Minecraft client and launcher for Linux and Windows.</p>
-  <p><a href="chan/">chan</a>: an anonymous image board.</p>
-  <p><a href="cloud/">sekcloud</a>: file storage, 20 GB for a one-time $10 in bitcoin.</p>
-  <p><a href="mail/">mail</a>: a free email address @sekraj.duckdns.org.</p>
-  <p><a href="host/">host</a>: your own little HTML site at sekraj.duckdns.org/~you/.</p>
+  <section class="lead container">
+    <a class="lead__shot" href="/rake/">
+      <img src="/rake/f/096.webp" alt="A red cabin on a hilltop at dusk, a campfire in front, and a tall pale figure standing in the trees to its left" width="1432" height="682">
+    </a>
+    <div class="lead__text">
+      <h1>The Rake [BETA]</h1>
+      <p>A Roblox horror game. Climb to the cabin before it finds you.</p>
+      <a class="go" href="/rake/">Follow the trail</a>
+    </div>
+  </section>
+
+  <section class="also container" aria-labelledby="also">
+    <h2 id="also">Also on this site</h2>
+    <ul class="list">
+      <li>
+        <a class="list__name" href="/tux-mc/">tux-mc</a>
+        <p>A Minecraft client and launcher for Linux and Windows, with capes and 3D hats other players can see.</p>
+      </li>
+      <li>
+        <a class="list__name" href="/chan/">chan</a>
+        <p>An anonymous image board. Random, technology, video games and music.</p>
+      </li>
+      <li>
+        <a class="list__name" href="/mail/">mail</a>
+        <p>A free email address ending in @sekraj.duckdns.org. Sending to big providers can land in spam.</p>
+      </li>
+      <li>
+        <a class="list__name" href="/host/">host</a>
+        <p>Your own small HTML site at sekraj.duckdns.org/~yourname/. Ask for one from your mail account.</p>
+      </li>
+      <li>
+        <a class="list__name" href="/cloud/">cloud</a>
+        <p>File storage, 20 GB for a one-time $10 in bitcoin. New signups are closed for now; existing accounts still work.</p>
+      </li>
+    </ul>
+  </section>
 </main>
+
+<footer class="foot container">
+  <p>Everything here runs on one PC at home. When it is switched off, so is the site.</p>
+</footer>
 </body>
 </html>

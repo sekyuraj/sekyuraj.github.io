@@ -529,7 +529,7 @@ async function api(req, res, s, url, name) {
 async function signupPage(req, res, url, error, username) {
     const n = await node();
     if (!cfg.descriptor) return send(res, 503, pages.signupClosed("Signups aren't open yet. The payment wallet isn't set up."));
-    if (!n.ok) return send(res, 503, pages.signupClosed("Signups are paused right now. Try again later."));
+    if (!n.ok) return send(res, 503, pages.signupClosed("Signups are closed for now. Accounts that already exist still work."));
     if (n.ibd) return send(res, 503, pages.signupClosed(`Signups open soon. The payment node is still syncing (${Math.floor(n.progress * 100)}%).`));
 
     const iphash = hmac("ip:" + clientIp(req));

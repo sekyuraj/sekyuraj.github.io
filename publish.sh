@@ -8,8 +8,11 @@
 set -e
 cd "$(dirname "$0")"
 
+# ./publish.sh "what changed"  (the commit message; asked for when left out)
+msg=$1
+if [ -z "$msg" ] && [ -n "$(git status --porcelain)" ]; then printf 'what changed? '; read -r msg; fi
 git add -A
-git commit -qm "update site" 2>/dev/null || echo "nothing new to commit"
+git commit -qm "${msg:-site update}" 2>/dev/null || echo "nothing new to commit"
 
 git ls-files \
   | grep -vE '^(CNAME|\.gitignore|\.nojekyll|[^/]*\.sh|tools/|selfhost/|server/|chan/|cloud/|mail/)' \
@@ -21,8 +24,8 @@ done
 find /srv/sekraj -mindepth 1 -type d -empty -delete
 echo "live: https://sekraj.duckdns.org"
 
-# ./publish.sh api  -> also restart the Node backend (after editing server/)
-if [ "$1" = api ]; then
+# PUBLISH_API=1 ./publish.sh ...  -> also restart the Node backend (after editing server/)
+if [ -n "$PUBLISH_API" ]; then
     sudo rc-service sekraj-api restart
 fi
 
