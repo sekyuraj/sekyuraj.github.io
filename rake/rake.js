@@ -1,191 +1,137 @@
-// The Rake [BETA]: the page is a camera flight filmed in Roblox Studio, one frame per scroll position.
-// Frames 0-132 are the flight (stops at 0 sign, 36 gnome, 96 cabin, 132 the Rake), 133-153 the gnome waving,
-// 154-169 the Rake's face; end/ holds the 52 frames of the One Week closing card.
+// The Rake [BETA]: a film filmed in the game, in stops. One scroll (wheel, swipe, arrow keys) moves one stop;
+// the flight between stops plays as video at its own speed, backwards when you scroll up.
+// stops: 0 the sign, 1 the gnome (waving), 2 the cabin, 3 the Rake (staring), 4 the ending (loops forever)
 'use strict';
-document.documentElement.classList.add('js');
+const ROBLOX_URL = ''; // set once the game is published on Roblox
 
-const ROBLOX_URL = ''; // set once the game is published
-const PATH_LAST = 132, GNOME_LOOP = [133, 21], RAKE_LOOP = [154, 16], CARD_FRAMES = 52;
-// scroll progress ranges: hold on a stop, fly between them, cut to black, the end card
-const PLAN = [
-  { to: 0.07, hold: 0 },
-  { to: 0.13, fly: [0, 36] },
-  { to: 0.25, hold: 1 },
-  { to: 0.47, fly: [36, 96] },
-  { to: 0.58, hold: 2 },
-  { to: 0.70, fly: [96, 132] },
-  { to: 0.82, hold: 3 },
-  { to: 0.88, cut: true },
-  { to: 1.01, end: true },
-];
-const STOP_FRAME = [0, 36, 96, PATH_LAST];
-const still = matchMedia('(prefers-reduced-motion: reduce)');
-
-const canvas = document.querySelector('.stage__film');
-const ctx = canvas.getContext('2d');
-const stops = [...document.querySelectorAll('.stop')];
-const credits = document.querySelector('.credits');
-const soundBtn = document.querySelector('.bar__sound');
+// the film is 2.39:1: on a wide screen it fills the height (cover), on a tall phone it is letterboxed to the width
+const needW = (innerWidth > innerHeight ? Math.max(innerWidth, innerHeight * 2.39) : innerWidth) * devicePixelRatio;
+const small = needW < 1100;
+const dir = small ? 'v/960/' : 'v/1920/';
+const stage = document.querySelector('.stage');
+const poster = document.querySelector('.poster');
+const ctas = [...document.querySelectorAll('.cta')];
+const soundBtn = document.querySelector('.sound');
 
 for (const a of document.querySelectorAll('[data-roblox]')) {
   if (ROBLOX_URL) { a.href = ROBLOX_URL; a.rel = 'noopener'; }
   else { a.textContent = 'Coming to Roblox soon'; a.setAttribute('aria-disabled', 'true'); a.removeAttribute('href'); }
 }
 
-// ---------- frames ----------
-const dir = innerWidth * devicePixelRatio > 1100 ? 'f' : 'm';
-const frames = new Array(170);
-const card = new Array(CARD_FRAMES);
-function load(list, i, src) {
-  const im = new Image();
-  im.decoding = 'async';
-  im.src = src;
-  im.onload = () => { list[i] = im; dirty = true; };
+function video(name) {
+  const v = document.createElement('video');
+  v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = dir + name + '.mp4';
+  stage.append(v);
+  return v;
 }
-const pad3 = (n) => String(n).padStart(3, '0');
-// the stops first, then the flight outward from them, then the loops and the card
-const order = [...STOP_FRAME];
-for (let i = 0; i <= PATH_LAST; i++) if (!order.includes(i)) order.push(i);
-for (let i = PATH_LAST + 1; i < 170; i++) order.push(i);
-order.forEach((i, k) => setTimeout(() => load(frames, i, `${dir}/${pad3(i)}.webp`), k < 4 ? 0 : 20 + k * 6));
-for (let i = 0; i < CARD_FRAMES; i++) setTimeout(() => load(card, i, `end/end${String(i + 1).padStart(2, '0')}.jpg`), 1600 + i * 15);
+const fwd = [video('a'), video('b'), video('c')];
+const rev = [video('a_r'), video('b_r'), video('c_r')];
+const loop = { 1: video('gnome'), 3: video('rake'), 4: video('end') };
+const black = document.createElement('div'); black.className = 'black'; stage.append(black);
 
-// nearest loaded frame, so a slow connection shows something instead of black
-function frame(i) {
-  if (frames[i]) return frames[i];
-  for (let d = 1; d < 40; d++) { if (frames[i - d]) return frames[i - d]; if (frames[i + d]) return frames[i + d]; }
-  return null;
+let shown = null;
+// put v on screen only once it has a frame to show, then take the old one away: no black flash in between
+function swap(v) {
+  return new Promise((done) => {
+    const go = () => { v.classList.add('on'); if (shown && shown !== v) shown.classList.remove('on'); if (shown !== v) poster.style.display = 'none'; shown = v; done(); };
+    let fired = false; const once = () => { if (!fired) { fired = true; go(); } };
+    if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(once); else v.addEventListener('timeupdate', once, { once: true });
+    setTimeout(once, 400); // never wait longer than this for a frame
+  });
 }
-
-// ---------- drawing ----------
-let W = 0, H = 0;
-function resize() {
-  const r = canvas.getBoundingClientRect();
-  W = Math.round(r.width * devicePixelRatio); H = Math.round(r.height * devicePixelRatio);
-  canvas.width = W; canvas.height = H; dirty = true;
+function ended(v) { return new Promise((r) => v.addEventListener('ended', r, { once: true })); }
+async function playFrom0(v, looped) {
+  v.loop = looped; v.currentTime = 0;
+  const p = swap(v); await v.play().catch(() => {}); await p;
 }
-function cover(im, alpha = 1, fit = false) {
-  // cover, but on a tall phone screen never zoom past 1.35x the width: a band with black above and below keeps the shot whole
-  const s = fit ? Math.min(W / im.naturalWidth, H / im.naturalHeight)
-    : Math.min(Math.max(W / im.naturalWidth, H / im.naturalHeight), 1.35 * W / im.naturalWidth);
-  const w = im.naturalWidth * s, h = im.naturalHeight * s;
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
-  ctx.globalAlpha = 1;
-}
-function black(a) { ctx.globalAlpha = a; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
-// a fractional frame: the two neighbours blended, so the scrub is smooth between filmed frames
-function film(f) {
-  const i = Math.floor(f), a = f - i;
-  const A = frame(i); if (!A) return black(1);
-  cover(A);
-  if (a > 0.02 && i < PATH_LAST) { const B = frame(i + 1); if (B && B !== A) cover(B, a); }
-}
-
-// ---------- the scroll ----------
-let target = 0, cur = 0, dirty = true, holdT = 0, endT = 0, last = performance.now(), shown = -1;
-function progress() {
-  const max = document.documentElement.scrollHeight - innerHeight;
-  return max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-}
-function where(p) {
-  let from = 0;
-  for (const seg of PLAN) { if (p < seg.to) return { seg, q: (p - from) / (seg.to - from) }; from = seg.to; }
-  return { seg: PLAN[PLAN.length - 1], q: 1 };
-}
-function caption(n) {
-  if (n === shown) return;
-  shown = n;
-  stops.forEach((s, i) => s.classList.toggle('is-on', i === n));
-  credits.classList.toggle('is-on', n === 4);
-}
-
-function tick(now) {
-  const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  target = progress();
-  const before = cur;
-  cur = still.matches ? target : cur + (target - cur) * (1 - Math.exp(-dt * 7));
-  if (Math.abs(target - cur) < 0.0004) cur = target;
-  const moving = cur !== before;
-  const { seg, q } = where(cur);
-  const settled = !moving && !still.matches;
-
-  if (seg.hold !== undefined) {
-    caption(seg.hold);
-    // the gnome waves and the Rake breathes while you stay; the flight frame comes back the moment you scroll on
-    holdT = settled ? holdT + dt : 0;
-    const loop = seg.hold === 1 ? GNOME_LOOP : seg.hold === 3 ? RAKE_LOOP : null;
-    if (loop && holdT > 0.15) { const k = Math.floor((holdT - 0.15) * (seg.hold === 1 ? 15 : 12)) % loop[1]; film(loop[0] + k); }
-    else if (moving || dirty || holdT === 0) film(STOP_FRAME[seg.hold]);
-    endT = 0; reel(false);
-  } else if (seg.fly) {
-    caption(-1);
-    if (moving || dirty) film(seg.fly[0] + (seg.fly[1] - seg.fly[0]) * q);
-    holdT = 0; endT = 0; reel(false);
-  } else if (seg.cut) {
-    // the game's own cut: a few hard flickers, then black
-    caption(-1);
-    film(PATH_LAST);
-    const flick = still.matches ? q : (q < 0.55 ? (Math.floor(q * 18) % 2 ? 1 : 0.45) : 1);
-    black(flick);
-    endT = 0; reel(false);
-  } else {
-    caption(4);
-    black(1);
-    if (!still.matches) endT += dt;
-    const im = card[cardIndex(endT)] || card.find(Boolean);
-    if (im) cover(im, Math.min(1, q * 4), true);
-    reel(true);
+async function still(v) {
+  v.pause(); v.loop = false;
+  if (v.currentTime !== 0 || v.readyState < 2) {
+    const seeked = new Promise((r) => { v.addEventListener('seeked', r, { once: true }); v.addEventListener('loadeddata', r, { once: true }); });
+    v.currentTime = 0;
+    await Promise.race([seeked, sleep(1500)]);
   }
-  dirty = false;
-  requestAnimationFrame(tick);
+  if (v.requestVideoFrameCallback) { v.play().then(() => v.pause()).catch(() => {}); } // makes the paused frame paint
+  await swap(v);
 }
-// the card as in the game: the steady frames run back and forth for 12 s, then the film's own fade, then again
-function cardIndex(t) {
-  if (still.matches) return 9;
-  const n = Math.floor(t * 14) % (168 + 32 + 21);
-  if (n < 168) { const m = n % 38; return m < 20 ? m : 38 - m; }
-  if (n < 200) return 20 + (n - 168);
-  return CARD_FRAMES - 1;
+// what a stop looks like while you stay there
+async function settle(s) {
+  if (loop[s]) return playFrom0(loop[s], true);
+  return still(fwd[s]); // stop 0 is the first frame of a, stop 2 the first frame of c
 }
 
-// ---------- sound: the end record, everywhere; it may only start after a click or a key ----------
-let audio = null, song = null, reelSrc = null, reelBuf = null, gain = null, on = false;
+let at = 0, busy = false, want = 0;
+async function step(d) {
+  const to = at + d;
+  if (to < 0 || to > 4) return;
+  busy = true; cta(-1);
+  if (d > 0 && to === 4) {
+    // the game's own cut: a few hard flickers, then black, then the ending
+    for (const o of [1, 0.45, 1, 0.45, 1]) { black.style.opacity = o; await sleep(60); }
+    for (const v of Object.values(loop)) if (v !== loop[4]) v.pause();
+    await playFrom0(loop[4], true);
+    black.style.opacity = 0;
+  } else if (d < 0 && at === 4) {
+    black.style.opacity = 1; loop[4].pause();
+    await settle(3);
+    black.style.transition = 'opacity .5s'; black.style.opacity = 0; await sleep(500); black.style.transition = '';
+  } else {
+    const clip = d > 0 ? fwd[at] : rev[to];
+    if (shown && shown !== clip) shown.pause();
+    await playFrom0(clip, false);
+    await ended(clip);
+    await settle(to);
+  }
+  at = to; busy = false; cta(at);
+  // keep going if the visitor kept scrolling while it flew
+  if (want !== 0) { const n = Math.sign(want); want = 0; step(n); }
+}
+function go(d) { if (busy) { want = d; return; } step(d); }
+function cta(s) { ctas.forEach((c) => c.classList.toggle('on', +c.dataset.at === s)); }
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+// ---------- input: one gesture = one stop ----------
+let acc = 0, quietUntil = 0;
+addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const now = performance.now();
+  if (now < quietUntil) { quietUntil = now + 180; return; } // the tail of one flick is not a second scroll
+  acc += e.deltaY;
+  if (Math.abs(acc) > 30) { go(Math.sign(acc)); acc = 0; quietUntil = now + 180; }
+}, { passive: false });
+let touchY = null;
+addEventListener('touchstart', (e) => { touchY = e.touches[0].clientY; }, { passive: true });
+addEventListener('touchend', (e) => {
+  if (touchY === null) return;
+  const dy = touchY - e.changedTouches[0].clientY; touchY = null;
+  if (Math.abs(dy) > 40) go(Math.sign(dy));
+}, { passive: true });
+addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+  if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+});
+
+// ---------- sound: the slowed record from the game's ending, all the time (browsers allow it after a click or key) ----------
+let audio = null, gain = null, on = false;
 async function startSound() {
   if (audio) return;
   audio = new AudioContext();
   gain = audio.createGain(); gain.gain.value = 0; gain.connect(audio.destination);
-  const get = async (u) => audio.decodeAudioData(await (await fetch(u)).arrayBuffer());
   try {
-    const buf = await get('song.mp3');
-    song = audio.createBufferSource(); song.buffer = buf; song.loop = true; song.connect(gain); song.start();
-    reelBuf = await get('reel.mp3');
-  } catch (e) {
-    soundBtn.hidden = true; // no sound on this browser: the page works without it
-    console.warn('sound unavailable:', e);
-    return;
-  }
+    const buf = await audio.decodeAudioData(await (await fetch('song.mp3')).arrayBuffer());
+    const src = audio.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(gain); src.start();
+  } catch (err) { soundBtn.hidden = true; console.warn('no sound:', err); return; }
   setSound(true);
 }
 function setSound(v) {
   on = v;
-  if (audio) { if (v) audio.resume(); gain.gain.setTargetAtTime(v ? 0.8 : 0, audio.currentTime, 0.4); }
-  soundBtn.setAttribute('aria-pressed', String(v));
-  soundBtn.textContent = v ? 'Sound on' : 'Sound off';
-}
-function reel(want) {
-  if (!audio || !reelBuf) return;
-  if (want && !reelSrc) {
-    reelSrc = audio.createBufferSource(); reelSrc.buffer = reelBuf; reelSrc.loop = true;
-    const g = audio.createGain(); g.gain.value = 0.35; reelSrc.connect(g).connect(gain); reelSrc.start();
-  } else if (!want && reelSrc) { reelSrc.stop(); reelSrc = null; }
+  if (audio) { if (v) audio.resume(); gain.gain.setTargetAtTime(v ? 0.8 : 0, audio.currentTime, 0.3); }
+  soundBtn.setAttribute('aria-pressed', String(v)); soundBtn.textContent = v ? 'Sound on' : 'Sound off';
 }
 soundBtn.hidden = false;
 soundBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!audio) startSound(); else setSound(!on); });
-const firstGesture = () => { startSound(); removeEventListener('pointerdown', firstGesture); removeEventListener('keydown', firstGesture); };
-addEventListener('pointerdown', firstGesture);
-addEventListener('keydown', firstGesture);
+const first = () => { startSound(); removeEventListener('pointerdown', first); removeEventListener('keydown', first); };
+addEventListener('pointerdown', first);
+addEventListener('keydown', first);
 
-addEventListener('resize', resize);
-resize();
-requestAnimationFrame(tick);
+settle(0).then(() => cta(0));

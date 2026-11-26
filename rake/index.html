@@ -4,74 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Rake [BETA]</title>
-<meta name="description" content="A Roblox horror game in a Swedish pine forest. Follow the lanterns up to the cabin.">
-<meta name="theme-color" content="#0d0a07">
+<meta name="description" content="A Roblox horror game. Climb to the cabin before it finds you.">
 <meta property="og:title" content="The Rake [BETA]">
-<meta property="og:description" content="A Roblox horror game in a Swedish pine forest. Follow the lanterns up to the cabin.">
-<meta property="og:image" content="https://sekraj.duckdns.org/rake/f/132.webp">
-<link rel="preload" href="/fonts/Balthazar-Regular.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="f/000.webp" as="image">
+<meta property="og:image" content="https://sekraj.duckdns.org/rake/poster.jpg">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="poster.jpg" as="image">
 <link rel="stylesheet" href="rake.css">
 <script src="rake.js" defer></script>
 </head>
 <body>
-<header class="bar">
-  <a class="bar__home" href="/">sekraj</a>
-  <button class="bar__sound" type="button" aria-pressed="false" hidden>Sound off</button>
-</header>
+<div class="stage" aria-hidden="true">
+  <img class="poster" src="poster.jpg" alt="">
+</div>
 
-<main class="track">
-  <div class="stage" aria-hidden="true">
-    <canvas class="stage__film"></canvas>
-    <div class="stage__shade"></div>
-  </div>
+<a class="home" href="/">sekraj</a>
+<button class="sound" type="button" aria-pressed="false" hidden>Sound off</button>
 
-  <section class="stop stop--sign" data-stop="0">
-    <img class="still" src="f/000.webp" alt="A notice board by the trail at dusk, painted with the words The Rake [BETA]" width="1432" height="682">
-    <div class="stop__text">
-      <h1 class="visually-hidden">The Rake [BETA]</h1>
-      <p class="lead">A Roblox horror game in a Swedish pine forest.</p>
-      <a class="play" data-roblox href="#play">Play on Roblox</a>
-      <p class="hint">Scroll to follow the trail. Click anywhere for sound.</p>
-    </div>
-  </section>
+<div class="cta" data-at="0">
+  <a class="play" data-roblox href="#">Play on Roblox</a>
+  <p class="hint">Scroll</p>
+</div>
+<div class="cta" data-at="4">
+  <a class="play" data-roblox href="#">Play on Roblox</a>
+</div>
 
-  <section class="stop stop--gnome" data-stop="1">
-    <img class="still" src="f/036.webp" alt="A garden gnome in a red hat waving beside a rockslide at the mouth of a mine" width="1432" height="682" loading="lazy">
-    <div class="stop__text">
-      <h2>Gruvan</h2>
-      <p>A rockslide shut the gnome’s mine. Lever the stones loose and he gives you his old spear.</p>
-    </div>
-  </section>
-
-  <section class="stop stop--cabin" data-stop="2">
-    <img class="still" src="f/096.webp" alt="A red cabin on the summit with a campfire, and a pale tall figure in the trees to its left" width="1432" height="682" loading="lazy">
-    <div class="stop__text">
-      <h2>Toppstugan</h2>
-      <p>The cabin at the end of the trail, 2.6 km up. Something is standing in the trees behind it.</p>
-    </div>
-  </section>
-
-  <section class="stop stop--rake" data-stop="3">
-    <img class="still" src="f/132.webp" alt="The Rake crouched with its jaw open and its eyes glowing white" width="1432" height="682" loading="lazy">
-    <div class="stop__text">
-      <h2>The Rake</h2>
-      <p>It follows you up the mountain. Run from it for five seconds with the spear and you get one strike.</p>
-    </div>
-  </section>
-
-  <section class="stop stop--end" data-stop="4">
-    <img class="still still--card" src="end/end10.jpg" alt="The closing card of Buster Keaton’s One Week (1920): The End" width="640" height="480" loading="lazy">
-    <div class="stop__text">
-      <h2 class="visually-hidden">The end</h2>
-      <a class="play" data-roblox href="#play">Play The Rake [BETA] on Roblox</a>
-    </div>
-  </section>
-</main>
-
-<footer class="credits">
-  <p>Made on <a href="/">sekraj.duckdns.org</a>.</p>
-  <p>Music: Venetian Love Song by the Victor Herbert Orchestra, an Edison cylinder from 1909 (public domain), slowed down. The end card is from Buster Keaton’s One Week (1920, public domain). Projector sound from Freesound #411981 (CC0).</p>
-</footer>
+<noscript>
+  <p class="noscript">The Rake [BETA], a Roblox horror game. This page plays a short film and needs JavaScript.</p>
+</noscript>
 </body>
 </html>

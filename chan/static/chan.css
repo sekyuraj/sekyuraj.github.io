@@ -4,22 +4,22 @@
 @font-face { font-family: "Luxi Mono"; src: url(fonts/luximbi.ttf) format("truetype"); font-weight: 700; font-style: italic; font-display: swap; }
 
 :root {
-  /* the site's dusk palette (see /site.css): ink on warm near-black, lantern amber for links */
-  --bg: oklch(15% 0.012 60);
-  --panel: oklch(20% 0.014 60);
-  --op: oklch(17% 0.013 60);
-  --line: oklch(31% 0.014 65);
-  --fg: oklch(91% 0.022 85);
-  --dim: oklch(70% 0.02 80);
-  --link: oklch(80% 0.11 75);
-  --name: oklch(78% 0.1 140);
-  --subject: oklch(76% 0.12 55);
-  --gt: oklch(78% 0.13 125);
-  --quote: oklch(72% 0.13 30);
-  --hl: oklch(30% 0.05 75);
-  --you: oklch(78% 0.1 140);
-  --focus: oklch(86% 0.12 80);
-  color-scheme: dark;
+  /* the classic image board blue */
+  --bg: #eef2ff;
+  --panel: #d6daf0;
+  --op: #eef2ff;
+  --line: #b7c5d9;
+  --fg: #000;
+  --dim: #707070;
+  --link: #34345c;
+  --name: #117743;
+  --subject: #0f0c5d;
+  --gt: #789922;
+  --quote: #d00;
+  --hl: #d6bad0;
+  --you: #117743;
+  --focus: #0f0c5d;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -84,7 +84,7 @@ h1, h2 { font-weight: 700; }
 .form .check { grid-column: 2; color: var(--dim); }
 .form .cap input { grid-column: 2; }
 .form .capbox { display: flex; gap: 8px; align-items: end; }
-.form .capimg { background: oklch(92% 0 0); border-radius: 3px; image-rendering: pixelated; max-width: 100%; height: auto; }
+.form .capimg { background: #ebebeb; border-radius: 3px; image-rendering: pixelated; max-width: 100%; height: auto; }
 .form .send { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: 88px; }
 .form .send button { padding: 3px 18px; font-weight: 700; }
 .form .hint { color: var(--dim); font-size: 11px; }
@@ -175,7 +175,7 @@ h1, h2 { font-weight: 700; }
   position: fixed; z-index: 10; pointer-events: none;
   max-width: min(640px, 92vw);
   background: var(--panel); border: 1px solid var(--dim); border-radius: 4px;
-  padding: 4px 10px 6px; box-shadow: 0 6px 18px oklch(0% 0 0 / .45);
+  padding: 4px 10px 6px; box-shadow: 0 4px 14px rgba(0,0,0,.25);
 }
 .preview .post { margin: 0; border: 0; padding: 0; background: none; display: block; }
 .preview .acts, .preview .modbar { display: none; }

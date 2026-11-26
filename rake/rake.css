@@ -1,82 +1,28 @@
-/* Hallmark · shape: one camera flight, scrubbed by the scroll wheel, four stops and a film ending · genre: atmospheric · theme: custom · job: try · idea: "the page is the game's own camera: your scroll flies the real map from the trail sign to the Rake's face, then the film ends" · vibe: "dusk forest, old film, something watching"
- * paper: oklch(14% 0.01 60) · accent: oklch(76% 0.13 70) · display: Special Elite · body: Balthazar · hero: the trailhead notice board, painted with the title, in the real game at dusk · nav: wordmark home link and a sound switch · footer: the credits under the film · imagery: frames filmed in Roblox Studio from the game itself · signature: scrolling flies the Roblox camera through the game
- * axes: dark/typewriter-slab/warm · posture: one accent (the lanterns) · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P5 H4 E4 S5 R4 V5 · weakest: E, the frames are 1432 px wide and soft on big screens; kept them sharp by drawing at device pixels and never upscaling past cover */
-/* waive 7b: true black is the film's own letterbox and the game's cut to black; a tinted black shows as a grey band around the frames */
-/* waive 22: same black, for the same reason */
-/* waive 44b: the headline is the painted notice board in the first frame (the game's own sign); the h1 is that text, visually hidden */
-@import url("/site-tokens.css");
-@import url("/site-base.css");
+/* The Rake: a full-screen film; white text, black, nothing else */
+:root { --fg: #fff; --bg: #000; --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font: 16px/1.4 var(--font); }
+.stage { position: fixed; inset: 0; }
+.stage video, .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* every video stays painted (a hidden one never reports frames); the one on screen is on top */
+.stage video { z-index: 0; }
+.stage .on { z-index: 1; }
+.poster { z-index: 2; }
+.black { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 3; }
 
-@import url("/fonts/fonts.css");
+.home, .sound { position: fixed; top: 16px; z-index: 2; color: var(--fg); text-shadow: 0 1px 3px #000; }
+.home { left: 20px; text-decoration: none; font-weight: 600; }
+.home:hover { text-decoration: underline; }
+.sound { right: 20px; background: none; border: 1px solid rgba(255,255,255,.7); border-radius: 4px; padding: 4px 10px; font: inherit; cursor: pointer; }
+.sound:hover { background: rgba(255,255,255,.15); }
+.sound[aria-pressed="true"] { background: #fff; color: #000; text-shadow: none; }
+:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
-:root {
-  /* the game's own ink and bone (its subtitles), and the amber of the trail lanterns */
-  --color-paper: oklch(14% 0.01 60); --color-paper-2: oklch(19% 0.012 60); --color-paper-3: oklch(24% 0.014 60);
-  --color-ink: oklch(91% 0.025 85); --color-ink-2: oklch(84% 0.025 85); --color-muted: oklch(70% 0.02 80);
-  --color-rule: oklch(32% 0.012 70);
-  --color-accent: oklch(76% 0.13 70); --color-accent-ink: oklch(16% 0.02 60); --color-focus: oklch(85% 0.12 80);
-  --color-black: oklch(0% 0 0); --color-hover: oklch(91% 0.025 85 / 0.12); --color-press: oklch(91% 0.025 85 / 0.22);
-  --color-accent-hover: oklch(82% 0.13 75); --color-shade: oklch(0% 0 0 / 0.55); --color-shade-0: oklch(0% 0 0 / 0);
-  --font-display: "Special Elite", ui-monospace, monospace; --font-body: "Balthazar", Georgia, serif;
-  --text-body: clamp(1.25rem, 0.5vw + 1.05rem, 1.5rem);
-  --shadow-text: 0 1px 2px var(--color-shade-strong), 0 0 18px var(--color-shade-mid);
-  --color-shade-strong: oklch(0% 0 0 / 0.9); --color-shade-mid: oklch(0% 0 0 / 0.6);
-}
-
-body { font-size: var(--text-body); line-height: 1.4; background: var(--color-black); }
-
-/* ---------- the bar ---------- */
-.bar { position: fixed; inset: 0 0 auto 0; z-index: var(--z-sticky-nav); display: flex; justify-content: space-between; align-items: center; padding: var(--space-md) var(--gutter); pointer-events: none; }
-.bar > * { pointer-events: auto; }
-.bar__home { font-size: var(--text-lg); text-decoration: none; text-shadow: var(--shadow-text); color: var(--color-ink-2); }
-.bar__home:hover { color: var(--color-ink); text-decoration: underline; }
-.bar__sound { background: none; border: 1px solid var(--color-ink-2); color: var(--color-ink); padding: var(--space-2xs) var(--space-sm); border-radius: var(--radius-card); cursor: pointer; text-shadow: var(--shadow-text); transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
-.bar__sound:hover { background: var(--color-hover); }
-.bar__sound:active { background: var(--color-press); }
-.bar__sound[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); text-shadow: none; }
-
-/* ---------- the play action: a lantern, the one warm thing on the page ---------- */
-.play { display: inline-block; margin-top: var(--space-lg); padding: var(--space-sm) var(--space-lg); background: var(--color-accent); color: var(--color-accent-ink); text-decoration: none; font-size: var(--text-lg); border-radius: var(--radius-card); transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
-.play:hover { background: var(--color-accent-hover); }
-.play:active { transform: translateY(1px); }
-.play[aria-disabled="true"] { background: var(--color-paper-3); color: var(--color-ink-2); cursor: default; }
-
-/* ---------- without script: the trail as a column of stills ---------- */
-.track { display: grid; gap: var(--space-2xl); padding: var(--space-3xl) 0 var(--space-2xl); background: var(--color-paper); }
-.stage { display: none; }
-.stop { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); display: grid; gap: var(--space-lg); }
-.still { width: 100%; height: auto; border-radius: var(--radius-card); }
-.still--card { max-width: 640px; }
-.stop__text { max-width: 34rem; }
-.stop h2 { font-size: var(--text-2xl); font-weight: 400; margin-bottom: var(--space-xs); }
-.lead { font-size: var(--text-lg); }
-.hint { margin-top: var(--space-md); color: var(--color-muted); font-size: var(--text-md); }
-.js .hint { display: block; }
-.hint { display: none; }
-
-/* ---------- with script: one sticky film, the stops are its captions ---------- */
-.js .track { display: block; position: relative; height: 1000vh; padding: 0; background: var(--color-black); }
-.js .stage { display: block; position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
-.js .stage__film { position: absolute; inset: 0; width: 100%; height: 100%; }
-.js .stage__shade { position: absolute; inset: auto 0 0 0; height: 45%; background: linear-gradient(to top, var(--color-shade), var(--color-shade-0)); pointer-events: none; }
-.js .still { display: none; }
-.js .stop { position: fixed; inset: auto 0 0 0; max-width: none; padding: 0 var(--gutter) var(--space-2xl); opacity: 0; visibility: hidden; transition: opacity var(--dur-long) var(--ease-out), visibility 0s linear var(--dur-long); pointer-events: none; z-index: var(--z-raised); }
-.js .stop.is-on { opacity: 1; visibility: visible; transition: opacity var(--dur-long) var(--ease-out), visibility 0s; pointer-events: auto; }
-.js .stop__text { max-width: 30rem; text-shadow: var(--shadow-text); }
-.js .stop--end { text-align: center; padding-bottom: calc(var(--space-2xl) + 4.5rem); }
-.js .stop--end .stop__text { max-width: none; }
-.js .credits { position: fixed; inset: auto 0 0 0; z-index: var(--z-raised); opacity: 0; visibility: hidden; transition: opacity var(--dur-long) var(--ease-out), visibility 0s linear var(--dur-long); }
-.js .credits.is-on { opacity: 1; visibility: visible; transition: opacity var(--dur-long) var(--ease-out), visibility 0s; }
-
-/* ---------- credits ---------- */
-.credits { padding: var(--space-lg) var(--gutter); color: var(--color-muted); font-size: var(--text-sm); display: grid; gap: var(--space-2xs); text-align: center; background: var(--color-black); }
-.credits p { max-width: 70ch; margin-inline: auto; }
-.credits a { color: var(--color-ink-2); }
-.credits a:hover { color: var(--color-ink); }
-
-@media (max-width: 40rem) {
-  .js .stop { padding-bottom: var(--space-xl); }
-  .js .stop--end { padding-bottom: calc(var(--space-xl) + 7rem); }
-  .credits { font-size: var(--text-xs); }
-}
+.cta { position: fixed; left: 0; right: 0; bottom: 48px; z-index: 2; text-align: center; opacity: 0; visibility: hidden; transition: opacity .4s, visibility 0s .4s; }
+.cta.on { opacity: 1; visibility: visible; transition: opacity .4s; }
+.play { display: inline-block; background: #fff; color: #000; text-decoration: none; font-weight: 600; padding: 12px 22px; border-radius: 4px; }
+.play:hover { background: #ddd; }
+.play[aria-disabled="true"] { background: rgba(0,0,0,.55); color: #fff; border: 1px solid rgba(255,255,255,.6); cursor: default; }
+.hint { margin: 14px 0 0; text-shadow: 0 1px 3px #000; opacity: .85; }
+@media (max-aspect-ratio: 1/1) { .stage video, .poster { object-fit: contain; } }
+.noscript { position: fixed; left: 20px; right: 20px; bottom: 40px; }
+@media (prefers-reduced-motion: reduce) { .cta { transition: none; } }

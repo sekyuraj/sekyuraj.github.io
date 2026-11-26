@@ -1,20 +1,21 @@
-@import url("/fonts/fonts.css");
-
 :root {
-  /* the site's dusk palette (see /site.css) */
-  --bg: oklch(15% 0.012 60);
-  --card: oklch(19% 0.014 60);
-  --line: oklch(31% 0.014 65);
-  --fg: oklch(92% 0.022 85);
-  --muted: oklch(72% 0.02 80);
-  --accent: oklch(76% 0.13 70);
-  --accent-fg: oklch(17% 0.02 60);
-  --hover: oklch(23% 0.016 60);
-  --err: oklch(72% 0.15 30);
-  --ok: oklch(78% 0.12 140);
-  --warn: oklch(80% 0.13 85);
-  --focus: oklch(86% 0.12 80);
-  color-scheme: dark;
+  --bg: #fff;
+  --card: #fff;
+  --line: #ddd;
+  --fg: #111;
+  --muted: #555;
+  --accent: #111;
+  --accent-fg: #fff;
+  --hover: #f3f3f3;
+  --err: #c5221f;
+  --ok: #137333;
+  --warn: #b06000;
+  --link: #1a0dab;
+  --focus: #1a0dab;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121212; --card: #1b1b1b; --line: #333; --fg: #e8e8e8; --muted: #a0a0a0; --accent: #e8e8e8; --accent-fg: #121212; --hover: #222; --err: #f28b82; --ok: #81c995; --warn: #fdd663; --link: #8ab4f8; --focus: #8ab4f8; color-scheme: dark; }
 }
 
 * { box-sizing: border-box; }
@@ -22,23 +23,22 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 16px/1.5 "Host Grotesk", system-ui, sans-serif;
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-a { color: var(--fg); text-underline-offset: .16em; }
-a:hover { text-decoration-thickness: 2px; }
+a { color: var(--link); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 html, body { overflow-x: clip; }
 main.narrow { max-width: 440px; margin: 0 auto; padding: 48px 16px 64px; }
 main.wide { max-width: 980px; margin: 0 auto; padding: 18px 16px 64px; }
-h1 { font-family: "Special Elite", ui-monospace, monospace; font-weight: 400; font-size: 28px; margin: 18px 0 6px; }
+h1 { font-size: 24px; margin: 18px 0 6px; }
 h2 { font-size: 17px; margin: 28px 0 8px; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
 .err { color: var(--err); }
 .ok { color: var(--ok); }
 
-.brand { font-family: "Special Elite", ui-monospace, monospace; font-size: 20px; color: var(--fg); text-decoration: none; }
-.brand b { font-weight: 400; color: var(--accent); }
+.brand { font-size: 18px; font-weight: 600; color: var(--fg); text-decoration: none; }
+.brand b { font-weight: 600; }
 
 button, .button {
   font: inherit; font-size: 14px;

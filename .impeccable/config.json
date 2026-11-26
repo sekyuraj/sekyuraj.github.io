@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "rake/index.html"
+        ],
+        "createdAt": "2026-11-26T20:02:05.341Z",
+        "reason": "Claude: computed from the oklch tokens, muted text is 7.4:1 on the page ground and the flagged h1 is visually hidden; the hook does not resolve the oklch custom properties"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-26T20:02:05.344Z",
+        "reason": "Claude: computed from the oklch tokens, nav links 12.1:1 and the muted section label 7.9:1 on oklch(15% .012 60); the hook does not resolve the oklch custom properties"
+      }
+    ]
+  }
+}
