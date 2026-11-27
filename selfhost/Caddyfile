@@ -18,9 +18,7 @@ sekraj.duckdns.org {
 		?Content-Security-Policy "default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
 		-Server
 	}
-	# tux-mc and bios.html have two small inline scripts (pinned by hash) and inline style attributes
-	@tuxmc path /tux-mc /tux-mc/ /tux-mc/index.html
-	header @tuxmc Content-Security-Policy "default-src 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-tLacyvDXM7iOBdrKicHZHGDOpIjXw5dTwO25l/lTFaI=' 'sha256-1bYHHe3SE5ji7T/2HhIPPaOd3hoICy83QpaTDL+iRYk='; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+	# bios.html has a small inline script (pinned by hash) and inline style attributes
 	@bios path /bios.html
 	header @bios Content-Security-Policy "default-src 'self'; style-src 'unsafe-inline'; script-src 'sha256-iPzFTf/rLQGduscbpGzrbJJUzjcaXptEiNv14foFJFI='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
 	# film frames, sound and fonts never change under the same name
